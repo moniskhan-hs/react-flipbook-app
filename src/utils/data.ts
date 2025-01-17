@@ -9,3 +9,13 @@ export const bookSizes = [
     // { type: "Magazine", dimensions: { width: 800, height: 1000 } },
     // { type: "Photo Book (Square)", dimensions: { width: 900, height: 900 } },
   ];
+
+  export function resizeBasedOnAspectRatio(width, height, scaleFactor) {
+    const aspectRatio = width / height;
+  
+    // Increase width and height by the scaleFactor
+    const newWidth = width * scaleFactor;
+    const newHeight = newWidth / aspectRatio; // Maintain aspect ratio
+  
+    return { newWidth, newHeight };
+  }

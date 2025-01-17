@@ -4,10 +4,10 @@ import { useSelector } from "react-redux";
 
 const LeftPage = React.forwardRef<
   HTMLDivElement,
-  { children: React.ReactNode; number: number }
+  { children: React.ReactNode; number: number,url:string }
 >((props, ref) => {
 
- const {selectedSize} = useSelector((state:{book:BookStateInitState})=>state.book)
+  const {width,height } = useSelector((state: {book:BookStateInitState}) => state.book);
 
 
 
@@ -15,13 +15,14 @@ const LeftPage = React.forwardRef<
     <div style={{ display: "flex", flexDirection: "row" }} ref={ref}>
       <Box
         sx={{
-          height: selectedSize?.dimensions.height,
-          width: selectedSize?.dimensions.width,
+          height: height,
+          width: width,
+          // aspectRatio:width/height,
           bgcolor: "rgba(255,255,255,1)",
           boxShadow: "inset -10px 0 20px -5px rgba(0, 0, 0, 0.2)",
           // Subtle shadow
           borderRadius: "18% 18% 18% 10% / 0% 2% 2% 0%",
-          backgroundImage:`url(/${props.number}.png)`,
+          backgroundImage:`url(${props.url})`,
           backgroundPosition:"center",
           backgroundSize: '100% 100%',
           backgroundRepeat:"no-repeat"
@@ -31,7 +32,7 @@ const LeftPage = React.forwardRef<
         }}
       >
         {/* <img
-          src={`${props.number}.png`}
+          src={prop.}
           alt="image"
           height={"100%"}
           width={"100%"}

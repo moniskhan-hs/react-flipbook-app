@@ -1,10 +1,10 @@
+
 import { Box } from "@mui/material";
 import React from "react";
 import { useSelector } from "react-redux";
 
-const RigthPage = React.forwardRef<
-  HTMLDivElement,
-  { children: React.ReactNode; number: number ; url:string }
+const BlankPage = React.forwardRef<
+  HTMLDivElement
 >((props, ref) => {
 
   const {width,height} = useSelector((state:{book:BookStateInitState})=>state.book)
@@ -16,8 +16,6 @@ const RigthPage = React.forwardRef<
       {/* Right Content Box */}
       <Box
         sx={{
-          // aspectRatio:width/height,
-
           height: height,
           width: width,
           bgcolor: "rgba(255,255,255,1)",
@@ -25,7 +23,7 @@ const RigthPage = React.forwardRef<
           borderRadius: "18% 18% 18% 18% / 2% 0% 0% 2%",
           zIndex: 10,
           // padding:"5px"
-          backgroundImage:`url(${props.url})`,
+        //   backgroundImage:`url(${props.url})`,
           backgroundPosition:"center",
           backgroundSize: '100% 100%',
           backgroundRepeat:"no-repeat"
@@ -49,4 +47,4 @@ const RigthPage = React.forwardRef<
   );
 });
 
-export default RigthPage;
+export default BlankPage;

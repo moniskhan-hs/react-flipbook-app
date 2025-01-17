@@ -1,8 +1,20 @@
 /// <reference types="vite/client" />
 
-type SelectedBookType ={ type: string; dimensions: { width: number; height: number } }
+declare module "pdfjs-dist/build/pdf.worker.entry" {
+  const workerSrc: string;
+  export default workerSrc;
+}
 
-type BookStateInitState  = {
-    selectedSize: SelectedBookType | null;
+
+type BookStateInitState  =  { width: number; height: number } 
+  
+  
+  interface PageSize {
+    width: number;
+    height: number;
+  }
+  
+  interface PdfPageSizeViewerProps {
+    pdfUrl: string;
   }
   

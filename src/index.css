@@ -7,3 +7,25 @@
 a{
   text-decoration: none;
 }
+
+/* .react-pdf__Document{
+
+  display: flex;
+  gap: 5rem;
+} */
+
+
+
+@media (max-width: 768px) {
+  .flipbook-container {
+    width: 100vw;
+    height: auto;
+    aspect-ratio: 3 / 4;
+  }
+}
+
+@media (max-width: 480px) {
+  .flipbook-container {
+    padding: 1rem;
+  }
+}
