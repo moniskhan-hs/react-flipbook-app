@@ -18,3 +18,6 @@ type BookStateInitState  =  { width: number; height: number }
     pdfUrl: string;
   }
   
+  interface BackgroundInitStateTyoe {
+    background: string | null; // The background can now hold a File object
+  }

@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 const BlankPage = React.forwardRef<
   HTMLDivElement
 >((props, ref) => {
+console.log('props:', props)
 
   const {width,height} = useSelector((state:{book:BookStateInitState})=>state.book)
 

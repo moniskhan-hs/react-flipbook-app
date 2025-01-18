@@ -1,10 +1,9 @@
-
-
-import { Button, Typography } from "@mui/material";
-import React, { useState } from "react";
+import { Button, Stack, Typography } from "@mui/material";
+import React, { useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import UploadBg from "../components/UploadBg";
 import { setSelectedSize } from "../redux/reducers/book";
 
 // Set the worker for PDF.js
@@ -12,18 +11,25 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 
 const PdfToImages = () => {
   const [numPages, setNumPages] = useState<number>(0);
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<
+    { dataUrl: string; width: number; height: number }[]
+  >([]);
   const [file, setFile] = useState<File | null>(null);
 
-  const dispatch = useDispatch()
-
-
+  const dispatch = useDispatch();
+  const processedPages = useRef<Set<number>>(new Set());
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setImages([]); // Reset images when a new document is loaded
-     // Clear existing images array from local storage when a new document is loaded
-     localStorage.setItem("pdf_images", JSON.stringify([]));
+    localStorage.setItem("pdf_images", JSON.stringify([])); // Clear existing images array from local storage
+    processedPages.current.clear();
+    dispatch(
+      setSelectedSize({
+        width: 0,
+        height: 0,
+      })
+    );
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,53 +41,224 @@ const PdfToImages = () => {
     }
   };
 
-  const capturePageAsImage = async (
+  const capturePageAsImage = (
     pageNumber: number,
     canvas: HTMLCanvasElement | null
   ) => {
-    if (canvas) {
-      setTimeout(() => {
-        
-        // Get canvas dimensions
-        const width = canvas.width;
-        const height = canvas.height;
-        
+    if (!canvas || processedPages.current.has(pageNumber)) return;
 
-  dispatch(setSelectedSize({width,height}))
+    // const width = canvas.width;
+    // console.log('canvas.width:', canvas.width)
+    // const height = canvas.height;
+    // console.log('canvas.height:', canvas.height)
+    processedPages.current.add(pageNumber); // Mark page as processed
 
-        // Ensure the canvas has the correct dimensions before capturing
-        const dataUrl = canvas.toDataURL("image/png", 1.0); // 1.0 ensures maximum quality
-        setImages((prev) => {
-          const updated = [...prev];
-          updated[pageNumber - 1] = { dataUrl, width, height }; // Store the image along with dimensions
-          return updated;
-        });
- // Retrieve the current images array from local storage
- const storedImages = JSON.parse(localStorage.getItem("pdf_images") || "[]");
+    // Ensure canvas is ready
+    setTimeout(() => {
+      const dataUrl = canvas.toDataURL("image/png", 1.0); // High-quality image
+      const { width, height } = canvas;
+      console.log("height inside the setTimout :", height);
+      console.log("width inside the setTimout:", width);
 
- // Update the images array with the new page image
- storedImages[pageNumber - 1] = dataUrl;
+      // --------------------------------------------------------------------------
+      const aspectRationofScreen = window.innerWidth / window.innerHeight;
+      console.log("aspectRationofScreen:", aspectRationofScreen);
 
- // Save the updated array back to local storage
- localStorage.setItem("pdf_images", JSON.stringify(storedImages));      }, 10);
-    }
+      const aspectRationOfBook = Number(width) / Number(height);
+      // 600 / 400
+      console.log("aspectRationOfBook:", aspectRationOfBook);
+
+      const availableHeigth = window.innerHeight - height;
+      console.log("availableHeigth:", availableHeigth);
+      const availableWidth = window.innerWidth / 2 - width;
+      console.log("availableWidth:", availableWidth);
+
+      // check if width negative and  height positive is available or not
+      if (availableWidth < 0 && availableHeigth > 0) {
+        // negative value
+        console.log("heigth + width -");
+        const negativeValueTopositive = Math.abs(availableWidth);
+        console.log("negativeValueTopositive:", negativeValueTopositive);
+        const newWidthOfFlipbook =
+          window.innerWidth / 2 - window.innerWidth * 0.1;
+        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
+
+        const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
+        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
+
+        dispatch(
+          setSelectedSize({
+            width: newWidthOfFlipbook,
+            height: newHeigthOFflipbook,
+          })
+        );
+        // both positive
+      } else if (availableHeigth > 0 && availableWidth > 0) {
+        console.log("heigth + width +");
+        const newWidthOfFlipbook = availableWidth / 2 + width;
+        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
+
+        const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
+        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
+
+        if (newHeigthOFflipbook > window.innerHeight) {
+          const newHeight = window.innerHeight * 0.8;
+          console.log("newHeight:", newHeight);
+          const newWidth = newHeight * aspectRationOfBook;
+          console.log("newWidth:", newWidth);
+
+          dispatch(
+            setSelectedSize({
+              width: newWidth,
+              height: newHeight,
+            })
+          );
+        } else {
+          dispatch(
+            setSelectedSize({
+              width: newWidthOfFlipbook,
+              height: newHeigthOFflipbook,
+            })
+          );
+        }
+        //  width and heigth negative
+      } else if (availableWidth < 0 && availableHeigth < 0) {
+        console.log("heigth - width -");
+
+        if (width > height) {
+          const newWidthOfFlipbook = (window.innerWidth / 2) * 0.9;
+          // const negativeValueTopositive = Math.abs(availableWidth);
+          console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
+
+          const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
+          console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
+
+          dispatch(
+            setSelectedSize({
+              width: newWidthOfFlipbook,
+              height: newHeigthOFflipbook,
+            })
+          );
+        } else {
+          const newHeigthOFflipbook = window.innerHeight * 0.9;
+          console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
+
+          const newWidthOfFlipbook = aspectRationOfBook * newHeigthOFflipbook;
+          console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
+          dispatch(
+            setSelectedSize({
+              width: newWidthOfFlipbook,
+              height: newHeigthOFflipbook,
+            })
+          );
+        }
+      } else if (availableHeigth < 0 && availableWidth > 0) {
+        console.log("heigth - width +");
+        // if(height>width){
+
+        // const newWidthOfFlipbook = wind
+
+        // }else{
+
+        // }
+
+        // const negativeValueTopositive = Math.abs(availableHeigth);
+
+        const newHeigthOFflipbook = window.innerHeight * 0.8;
+        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
+
+        const newWidthOfFlipbook = newHeigthOFflipbook * aspectRationOfBook;
+        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
+
+        dispatch(
+          setSelectedSize({
+            width: newWidthOfFlipbook,
+            height: newHeigthOFflipbook,
+          })
+        );
+        // dispatch(
+        //   setSelectedSize({
+        //     width: 400,
+        //     height: 600,
+        //   })
+        // );
+      }
+
+      // else {
+      //   if (width > height) {
+      //     // const newHeightOfFlipbook = height + availableHeigth;
+      //     // console.log("newHeightOfFlipbook:", newHeightOfFlipbook);
+
+      //     const newWidthOfFlipbook = availableWidth / 2 + width;
+      //     console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
+      //     const newHeigthOFflipbook =
+      //       (availableWidth / 2 + width) / aspectRationOfBook;
+      //     console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
+
+      //     dispatch(
+      //       setSelectedSize({
+      //         width: newWidthOfFlipbook,
+      //         height: newHeigthOFflipbook,
+      //       })
+      //     );
+      //   } else {
+      //     dispatch(setSelectedSize({ width, height }));
+      //   }
+      // }
+
+      setImages((prev) => {
+        const updated = [...prev];
+        updated[pageNumber - 1] = { dataUrl, width, height };
+        return updated;
+      });
+
+      // Save to local storage
+      const storedImages = JSON.parse(
+        localStorage.getItem("pdf_images") || "[]"
+      );
+      storedImages[pageNumber - 1] = dataUrl;
+      localStorage.setItem("pdf_images", JSON.stringify(storedImages));
+      console.log(`Page ${pageNumber} saved to localStorage.`);
+      // dispatch(setSelectedSize({ width, height }));
+    }, 100);
   };
 
+  // useEffect(() => {
+  //   const storedImages = localStorage.getItem("pdf_images");
+  //   if (storedImages) {
+  //     const parsedImages = JSON.parse(storedImages);
+  //     setImages(parsedImages.map((dataUrl: string) => ({ dataUrl })));
+  //   }
+  // }, []);
+
   return (
-    <div>
-      <input
-        type="file"
-        accept="application/pdf"
-        onChange={handleFileUpload}
-        style={{ marginBottom: "20px" }}
-      />
+    <div
+   
+    >
+      <Stack direction={"row"} alignItems={'center'}  mt ={5} gap={5} justifyContent={"center"}>
+        <Stack direction={"row"} gap={2}>
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={handleFileUpload}
+            style={{ marginBottom: "20px" }}
+          />
 
-<Link to={'/'}>
-<Button variant="contained" sx={{
-  textTransform:'none'
-}}>Home</Button>
-</Link>
+          <Link to={"/"}>
+            <Button
+              variant="contained"
+              sx={{
+                textTransform: "none",
+                paddingInline:"2rem"
+              }}
+            >
+              Home
+            </Button>
+          </Link>
+        </Stack>
 
+        <UploadBg />
+      </Stack>
 
       {file ? (
         <Document
@@ -90,7 +267,6 @@ const PdfToImages = () => {
           loading={<p>Loading PDF...</p>}
           error={<p>Failed to load PDF.</p>}
         >
-          {/* Render each page and capture its image */}
           {Array.from({ length: numPages }, (_, i) => (
             <div key={i}>
               <Typography>Rendering Page {i + 1}</Typography>
@@ -104,25 +280,26 @@ const PdfToImages = () => {
           ))}
         </Document>
       ) : (
-        <Typography>Please upload a valid PDF file to view it.</Typography>
+        <Typography textAlign={'center'} mt={5}>Please upload a valid PDF file to view it.</Typography>
       )}
 
-      {/* Display extracted images */}
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 20 , textAlign:"center"}}>
         <Typography variant="h6">Extracted Images:</Typography>
         {images.length > 0 ? (
           images.map(({ dataUrl, width, height }, index) => (
             <div key={index} style={{ marginBottom: 20 }}>
-              <Typography>Page {index + 1}</Typography>
+              <Typography>
+                Page {index + 1}: Width: {width}px, Height: {height}px
+              </Typography>
               <img
-                src={dataUrl} // Use the data URL directly
+                src={dataUrl}
                 alt={`Page ${index + 1}`}
                 style={{ width: `${width}px`, height: `${height}px` }}
               />
             </div>
           ))
         ) : (
-          <p>Images are being generated...</p>
+          <p>No images available yet.</p>
         )}
       </div>
     </div>
