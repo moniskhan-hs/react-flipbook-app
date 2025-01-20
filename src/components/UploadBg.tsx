@@ -5,10 +5,11 @@ import { setbackground } from "../redux/reducers/setBackground";
 
 const UploadBg = () => {
   const [file, setFile] = useState<File | null>(null); // Type `File` for file objects
+  console.log('file:', file)
   const dispatch = useDispatch();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFile = e.target.files?.[0];
+    const uploadedFile =  e.target.files?.[0];
     if (uploadedFile) {
       setFile(uploadedFile);
 
