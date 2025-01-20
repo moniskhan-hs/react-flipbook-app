@@ -1,7 +1,8 @@
 
 import { pdfjs } from 'react-pdf';
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import DemoBook from "./pages/Home";
+// import DemoBook from "./pages/Home";
+import FlipbookView from './pages/Home';
 import PdfToImages from "./pages/PageSizeViewer";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -17,7 +18,7 @@ const App = () => {
     <Router>
       <Routes>
         {/* <Route path="/" element={<Home/>}/> */}
-        <Route path="/" element={<DemoBook/>}/>
+        <Route path="/" element={<FlipbookView/>}/>
         <Route path="/upload" element={<PdfToImages />}/>
       </Routes>
     </Router>

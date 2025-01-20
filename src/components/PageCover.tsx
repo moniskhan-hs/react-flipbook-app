@@ -18,15 +18,15 @@ const PageCover = React.forwardRef<
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          borderTopLeftRadius: 10,
-          borderBottomLeftRadius: 10,
-          marginBottom: 20,
+          // borderTopLeftRadius: 10,
+          // borderBottomLeftRadius: 10,
         }}
       >
         <Box>
-          <h2>{props.children}</h2>
+          <h2 style={{
+            fontSize:"0.7rem"
+          }}>{props.children}</h2>
 
-          <Typography>Welcome</Typography>
         </Box>
       </Stack>
     </div>

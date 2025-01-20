@@ -18,8 +18,8 @@ const FirstCoverPage = React.forwardRef<
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          borderTopRightRadius: 10,
-          borderBottomRightRadius: 10,
+          // borderTopRightRadius: 10,
+          // borderBottomRightRadius: 10,
           // backgroundImage:`url(/1.png)`,
           // backgroundPosition:"center",
           // backgroundSize: '100% 100%',
@@ -28,7 +28,9 @@ const FirstCoverPage = React.forwardRef<
         }}
       >
         <Box>
-          <h2>{props.children}</h2>
+          <h2 style={{
+            fontSize:"0.7rem"
+          }}>{props.children}</h2>
 
           {/* <Typography>to my Book</Typography> */}
         </Box>

@@ -1,4 +1,4 @@
-import { Button, Stack, Typography } from "@mui/material";
+import { Button, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import React, { useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useDispatch } from "react-redux";
@@ -31,6 +31,9 @@ const PdfToImages = () => {
       })
     );
   };
+
+
+
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = event.target.files?.[0];
@@ -154,16 +157,6 @@ const PdfToImages = () => {
         }
       } else if (availableHeigth < 0 && availableWidth > 0) {
         console.log("heigth - width +");
-        // if(height>width){
-
-        // const newWidthOfFlipbook = wind
-
-        // }else{
-
-        // }
-
-        // const negativeValueTopositive = Math.abs(availableHeigth);
-
         const newHeigthOFflipbook = window.innerHeight * 0.8;
         console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
 
@@ -176,35 +169,7 @@ const PdfToImages = () => {
             height: newHeigthOFflipbook,
           })
         );
-        // dispatch(
-        //   setSelectedSize({
-        //     width: 400,
-        //     height: 600,
-        //   })
-        // );
       }
-
-      // else {
-      //   if (width > height) {
-      //     // const newHeightOfFlipbook = height + availableHeigth;
-      //     // console.log("newHeightOfFlipbook:", newHeightOfFlipbook);
-
-      //     const newWidthOfFlipbook = availableWidth / 2 + width;
-      //     console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
-      //     const newHeigthOFflipbook =
-      //       (availableWidth / 2 + width) / aspectRationOfBook;
-      //     console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
-
-      //     dispatch(
-      //       setSelectedSize({
-      //         width: newWidthOfFlipbook,
-      //         height: newHeigthOFflipbook,
-      //       })
-      //     );
-      //   } else {
-      //     dispatch(setSelectedSize({ width, height }));
-      //   }
-      // }
 
       setImages((prev) => {
         const updated = [...prev];
