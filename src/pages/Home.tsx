@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Stack,
   useMediaQuery,
   useTheme
@@ -8,6 +9,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import FirstCoverPage from "../components/FirstCoverPage";
 import LeftPage from "../components/LeftPage";
 import PageCover from "../components/PageCover";
@@ -210,8 +212,6 @@ const FlipbookView: React.FC = () => {
         alignItems: "center",
         justifyContent: "center",
         padding: isMobileView ? "2rem" : "1rem", // Padding around the container
-        // height: "100vh",
-        // backgroundColor: "#f5f5f5",
 
         width: "100vw", // full width of the screen
         height: "100vh", // full heigth of the screen
@@ -224,6 +224,16 @@ const FlipbookView: React.FC = () => {
         backgroundPosition: "center",
       }}
     >
+
+    { !isMobileView && <Link to={'/upload'} style={{
+        position:"static"
+      }}>
+      <Button variant="contained">
+      Go to Upload
+      </Button>
+      
+      </Link>}
+
       {/* ------------------------------------------ Wrapper of cover+Book--------------------------------- */}
       <Box
         sx={{

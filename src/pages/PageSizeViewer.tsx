@@ -207,9 +207,13 @@ const PdfToImages = () => {
             accept="application/pdf"
             onChange={handleFileUpload}
             style={{ marginBottom: "20px" }}
-          />
+          />  
+        </Stack>
 
-          <Link to={"/"}>
+        <UploadBg />
+
+
+        <Link to={"/"}>
             <Button
               variant="contained"
               sx={{
@@ -220,9 +224,6 @@ const PdfToImages = () => {
               Home
             </Button>
           </Link>
-        </Stack>
-
-        <UploadBg />
       </Stack>
 
       {file ? (

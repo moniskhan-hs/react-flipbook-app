@@ -1,6 +1,6 @@
+import { Stack, TextField } from "@mui/material";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Button, Stack, TextField } from "@mui/material";
 import { setbackground } from "../redux/reducers/setBackground";
 
 const UploadBg = () => {
@@ -17,14 +17,7 @@ const UploadBg = () => {
     }
   };
 
-  const handleSetBackground = () => {
-    if (file) {
-      console.log("file:", file);
-      console.log("Background set:", file.name); // Debugging/logging
-    } else {
-      console.log("No file selected");
-    }
-  };
+
 
   return (
     <Stack direction="row" spacing={2}>
@@ -35,17 +28,6 @@ const UploadBg = () => {
         size="small"
         InputLabelProps={{ shrink: true }} // Ensures placeholder works with file input
       />
-
-      <Button
-        variant="contained"
-        sx={{
-          textTransform: "none",
-        }}
-        onClick={handleSetBackground} // Button triggers setting the background
-        disabled={!file} // Disable button if no file is selected
-      >
-        Set Background
-      </Button>
     </Stack>
   );
 };
