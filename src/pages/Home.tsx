@@ -1,26 +1,19 @@
 import {
   Box,
-  Button,
   Stack,
-  Typography,
   useMediaQuery,
-  useTheme,
+  useTheme
 } from "@mui/material";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import FirstCoverPage from "../components/FirstCoverPage";
 import LeftPage from "../components/LeftPage";
 import PageCover from "../components/PageCover";
 import RigthPage from "../components/RigthPage";
 import StackedLeft from "../components/StackedLeft";
 import StackedRigth from "../components/StackedRigth";
-import { EventNoteTwoTone } from "@mui/icons-material";
-import pageFlip from "react-pageflip";
-import PageFlip from "react-pageflip";
-import zIndex from "@mui/material/styles/zIndex";
 import { setSelectedSize } from "../redux/reducers/book";
 
 // PageCover Component
@@ -32,7 +25,7 @@ const FlipbookView: React.FC = () => {
       turnToPage: (pageIndex: number) => void;
     };
   };
-  const flipBookRef = useRef<unknown | null>(null);
+  const flipBookRef = useRef<HTMLFlipBookRef | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const { width, height } = useSelector(
@@ -86,8 +79,8 @@ const FlipbookView: React.FC = () => {
     console.log("event:", event);
     conditionRef.current = event.data;
 
-    const currentPage = event.object.pages.currentPageIndex;
-    console.log("flipbookref:", flipBookRef.current);
+    // const currentPage = event.object.pages.currentPageIndex;
+    // console.log("flipbookref:", flipBookRef.current);
 
     // if (currentPage === 1) {
     //   console.log("Preventing flip to page:", currentPage);
@@ -116,9 +109,6 @@ const FlipbookView: React.FC = () => {
     return JSON.parse(localStorage.getItem("pdf_images") || "[]");
   };
 
-  const prevButtonClick = () => {
-    flipBookRef.current?.getPageFlip().flipNext();
-  };
 
   //------------------------------- Mobile view logic---------------------------
   useEffect(() => {
@@ -202,7 +192,8 @@ const FlipbookView: React.FC = () => {
       }
     };
 
-    if (isMobileView) handleresize();
+    if (isMobileView)
+       handleresize();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobileView]);

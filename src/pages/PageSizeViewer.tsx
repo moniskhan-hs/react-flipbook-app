@@ -1,4 +1,4 @@
-import { Button, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Button, Stack, Typography } from "@mui/material";
 import React, { useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useDispatch } from "react-redux";
