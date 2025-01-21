@@ -314,7 +314,7 @@ const FlipbookView: React.FC = () => {
             onChangeState={onChnageStateOfpage}
             startPage={1}
             flippingTime={isMobileView ? 3000 : 1000}
-            swipeDistance={isMobileView?60:30}
+            // swipeDistance={isMobileView?60:30}
             startZIndex={isMobileView?10:0}
           >
             <FirstCoverPage isMobileView={isMobileView} >Welcome</FirstCoverPage>
