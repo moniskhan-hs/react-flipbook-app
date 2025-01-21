@@ -3,6 +3,7 @@ import React, { useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import interiorPdf from "/Pocket.pdf";
 import UploadBg from "../components/UploadBg";
 import { setSelectedSize } from "../redux/reducers/book";
 
@@ -31,9 +32,6 @@ const PdfToImages = () => {
       })
     );
   };
-
-
-
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = event.target.files?.[0];
@@ -188,47 +186,43 @@ const PdfToImages = () => {
     }, 100);
   };
 
-  // useEffect(() => {
-  //   const storedImages = localStorage.getItem("pdf_images");
-  //   if (storedImages) {
-  //     const parsedImages = JSON.parse(storedImages);
-  //     setImages(parsedImages.map((dataUrl: string) => ({ dataUrl })));
-  //   }
-  // }, []);
-
   return (
-    <div
-   
-    >
-      <Stack direction={"row"} alignItems={'center'}  mt ={5} gap={5} justifyContent={"center"}>
+    <div>
+      <Stack
+        direction={"row"}
+        alignItems={"center"}
+        mt={5}
+        gap={5}
+        justifyContent={"center"}
+      >
         <Stack direction={"row"} gap={2}>
           <input
             type="file"
             accept="application/pdf"
             onChange={handleFileUpload}
             style={{ marginBottom: "20px" }}
-          />  
+          />
         </Stack>
 
         <UploadBg />
 
-
         <Link to={"/"}>
-            <Button
-              variant="contained"
-              sx={{
-                textTransform: "none",
-                paddingInline:"2rem"
-              }}
-            >
-              Home
-            </Button>
-          </Link>
+          <Button
+            variant="contained"
+            sx={{
+              textTransform: "none",
+              paddingInline: "2rem",
+            }}
+          >
+            Home
+          </Button>
+        </Link>
       </Stack>
 
       {file ? (
         <Document
-          file={file}
+          file={interiorPdf} //static pdf for demo purpose
+          // file={file}    // dynamic pdf upload
           onLoadSuccess={onDocumentLoadSuccess}
           loading={<p>Loading PDF...</p>}
           error={<p>Failed to load PDF.</p>}
@@ -246,10 +240,14 @@ const PdfToImages = () => {
           ))}
         </Document>
       ) : (
-        <Typography textAlign={'center'} mt={5}>Please upload a valid PDF file to view it.</Typography>
+        <Typography textAlign={"center"} mt={5}>
+          Please upload a valid PDF file to view it.
+        </Typography>
       )}
 
-      <div style={{ marginTop: 20 , textAlign:"center"}}>
+
+
+      <div style={{ marginTop: 20, textAlign: "center" }}>
         <Typography variant="h6">Extracted Images:</Typography>
         {images.length > 0 ? (
           images.map(({ dataUrl, width, height }, index) => (
@@ -273,3 +271,4 @@ const PdfToImages = () => {
 };
 
 export default PdfToImages;
+

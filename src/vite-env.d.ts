@@ -21,3 +21,10 @@ type BookStateInitState  =  { width: number; height: number }
   interface BackgroundInitStateTyoe {
     background: string | null; // The background can now hold a File object
   }
+
+  type HTMLFlipBookRef = {
+    pageFlip: () => {
+      getPageCount: () => number;
+      turnToPage: (pageIndex: number) => void;
+    };
+  };

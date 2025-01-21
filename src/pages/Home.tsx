@@ -1,15 +1,8 @@
-import {
-  Box,
-  Button,
-  Stack,
-  useMediaQuery,
-  useTheme
-} from "@mui/material";
+import { Box, Stack, useMediaQuery, useTheme } from "@mui/material";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import FirstCoverPage from "../components/FirstCoverPage";
 import LeftPage from "../components/LeftPage";
 import PageCover from "../components/PageCover";
@@ -18,15 +11,7 @@ import StackedLeft from "../components/StackedLeft";
 import StackedRigth from "../components/StackedRigth";
 import { setSelectedSize } from "../redux/reducers/book";
 
-// PageCover Component
-
 const FlipbookView: React.FC = () => {
-  type HTMLFlipBookRef = {
-    pageFlip: () => {
-      getPageCount: () => number;
-      turnToPage: (pageIndex: number) => void;
-    };
-  };
   const flipBookRef = useRef<HTMLFlipBookRef | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
@@ -81,19 +66,19 @@ const FlipbookView: React.FC = () => {
     console.log("event:", event);
     conditionRef.current = event.data;
 
-    // const currentPage = event.object.pages.currentPageIndex;
-    // console.log("flipbookref:", flipBookRef.current);
+    const currentPage = event.object.pages.currentPageIndex;
+    console.log("flipbookref:", flipBookRef.current);
 
-    // if (currentPage === 1) {
-    //   console.log("Preventing flip to page:", currentPage);
-    //   flipBookRef.current?.pageFlip().turnToPage(1); // Go back to the first page
-    //   console.log(
-    //     "flipBookRef.current?.pageFlip().turnToPage(1):",
-    //     flipBookRef.current?.pageFlip().turnToPage(1)
-    //   );
-    // } else {
-    //   console.log("Allowed flip to page:", currentPage);
-    // }
+    if (currentPage === 1) {
+      console.log("Preventing flip to page:", currentPage);
+      flipBookRef.current?.pageFlip().turnToPage(1); // Go back to the first page
+      console.log(
+        "flipBookRef.current?.pageFlip().turnToPage(1):",
+        flipBookRef.current?.pageFlip().turnToPage(1)
+      );
+    } else {
+      console.log("Allowed flip to page:", currentPage);
+    }
   };
 
   // UseLayoutEffect to manage StackedRigth visibility
@@ -107,10 +92,9 @@ const FlipbookView: React.FC = () => {
   }, [currentPage]);
   // -------------------------------------- PDF Logic----------------------------------------------
 
-  const getImagesFromLocalStorage = () => {
-    return JSON.parse(localStorage.getItem("pdf_images") || "[]");
-  };
-
+  // const getImagesFromLocalStorage = () => {
+  //   return JSON.parse(localStorage.getItem("pdf_images") || "[]");
+  // };
 
   //------------------------------- Mobile view logic---------------------------
   useEffect(() => {
@@ -194,15 +178,10 @@ const FlipbookView: React.FC = () => {
       }
     };
 
-    if (isMobileView)
-       handleresize();
+    if (isMobileView) handleresize();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMobileView]);
-
-  if (getImagesFromLocalStorage().length == 0) {
-    return <Box>Sorry... No Book Available</Box>;
-  }
 
   return (
     <Box
@@ -224,15 +203,18 @@ const FlipbookView: React.FC = () => {
         backgroundPosition: "center",
       }}
     >
+      {/* ------------------------------ Pdf Upload Button-------------------------------- */}
 
-    { !isMobileView && <Link to={'/upload'} style={{
-        position:"static"
-      }}>
-      <Button variant="contained">
-      Go to Upload
-      </Button>
-      
-      </Link>}
+      {/* {!isMobileView && (
+        <Link
+          to={"/upload"}
+          style={{
+            position: "static",
+          }}
+        >
+          <Button variant="contained">Go to Upload</Button>
+        </Link>
+      )} */}
 
       {/* ------------------------------------------ Wrapper of cover+Book--------------------------------- */}
       <Box
@@ -240,19 +222,24 @@ const FlipbookView: React.FC = () => {
           ...(isMobileView
             ? width > height
               ? {
+                  // ---------------- when desktip view pdf uploaded and being view by mobile
                   position: "relative",
                   // bgcolor: "red",
                   transform: " rotate(-90deg) scale(3) ",
                 }
               : {
-                  height: "90vh",
-                  width: "auto",
+                  // ------------------ Normal Pdf uploaded and being view by mobile
+                  height: "100%",
+                  width: "100%",
+                  bgcolor: "rgba(255,255,255,1)",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  transform: "scale(1.9)",
+                  // mt:"150",
+                  transform: "scale(2.5)",
                 }
             : {
+                // --------------------- PC or Desktop view
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
@@ -280,9 +267,9 @@ const FlipbookView: React.FC = () => {
           sx={{
             transition: "background-color 0.3s ease",
             background: isMobileView
-            ? "none"
-            : currentPage > 0  || currentPage ==3
-            ? `linear-gradient(
+              ? "none"
+              : currentPage > 0 || currentPage == 3
+              ? `linear-gradient(
                 90deg,
                 #878787 0%,
                 #878787 calc(50% - 30px),
@@ -290,19 +277,22 @@ const FlipbookView: React.FC = () => {
                 #505050 calc(50% + 30px),
                 #878787 calc(50% + 30px)
               )`
-            : "transparent",
+              : "transparent",
             position: "relative",
             overflow: "hidden",
           }}
         >
-        {!isMobileView &&  <Box
-            sx={{
-              visibility:
-                currentPage > 5 && currentPage < 4 ? "visible" : "hidden",
-            }}
-          >
-            <StackedLeft />
-          </Box>}
+          {!isMobileView && (
+            <Box
+              sx={{
+                visibility:
+                  currentPage > 5 && currentPage < 4 ? "visible" : "hidden",
+                cursor: currentPage > 1 ? "none" : "pointer",
+              }}
+            >
+              <StackedLeft />
+            </Box>
+          )}
 
           {/* Flipbook Component */}
           {/* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */}
@@ -312,16 +302,17 @@ const FlipbookView: React.FC = () => {
             height={height}
             usePortrait={isMobileView ? true : false}
             autoSize={false}
-            mobileScrollSupport={isMobileView ? true : false}
-            showCover={true} 
+            // mobileScrollSupport={isMobileView ? true : false}
+            showCover={true}
             onFlip={onPageChange}
             ref={flipBookRef}
             onChangeState={onChnageStateOfpage}
             startPage={1}
+            flippingTime={isMobileView ? 500 : 1000}
           >
-           <FirstCoverPage>Welcome to my Book</FirstCoverPage>
-
-            {getImagesFromLocalStorage().map((img: string, index: number) => {
+            <FirstCoverPage>Welcome to my Book</FirstCoverPage>
+            {/* ---------------------- Dynamic page viewer---------------------- */}
+            {/* {getImagesFromLocalStorage().map((img: string, index: number) => {
               return index % 2 === 0 ? (
                 <LeftPage number={index + 1} key={index} url={img}>
                   Left Page {index + 1}
@@ -331,21 +322,43 @@ const FlipbookView: React.FC = () => {
                   Right Page {index + 1}
                 </RigthPage>
               );
-            })}
-            {/* { getImagesFromLocalStorage().length %2==1 && (<BlankPage/>)} */}
+            })} */}
 
-       <PageCover>The End</PageCover>
+            {/* -------------------------------Static Page Viewer------------------------ */}
+
+            {new Array(10).fill("1").map((_, index) => {
+              return index % 2 === 0 ? (
+                <LeftPage
+                  number={index + 1}
+                  key={index}
+                  isMobileView={isMobileView}
+                >
+                  Left Page {index + 1}
+                </LeftPage>
+              ) : (
+                <RigthPage
+                  number={index + 1}
+                  key={index}
+                  isMobileView={isMobileView}
+                >
+                  Right Page {index + 1}
+                </RigthPage>
+              );
+            })}
+
+            <PageCover>The End</PageCover>
           </HTMLFlipBook>
 
-         {!isMobileView && <Box
-            sx={{
-              visibility:
-                currentPage > 0 && currentPage < 4 ? "visible" : "hidden",
-            }}
-          >
-            <StackedRigth />
-          </Box>}
-
+          {!isMobileView && (
+            <Box
+              sx={{
+                visibility:
+                  currentPage > 0 && currentPage < 4 ? "visible" : "hidden",
+              }}
+            >
+              <StackedRigth />
+            </Box>
+          )}
         </Stack>
       </Box>
     </Box>
