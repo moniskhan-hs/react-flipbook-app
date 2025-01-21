@@ -233,7 +233,7 @@ const FlipbookView: React.FC = () => {
                   width: "100%",
                   bgcolor: "rgba(255,255,255,1)",
                   display: "flex",
-                  justifyContent: "center",
+                  // justifyContent: "start",
                   alignItems: "center",
                   // mt:"150",
                   transform: "scale(2.5)",
@@ -308,7 +308,7 @@ const FlipbookView: React.FC = () => {
             ref={flipBookRef}
             onChangeState={onChnageStateOfpage}
             startPage={1}
-            flippingTime={isMobileView ? 500 : 1000}
+            flippingTime={isMobileView ? 3000 : 1000}
           >
             <FirstCoverPage>Welcome to my Book</FirstCoverPage>
             {/* ---------------------- Dynamic page viewer---------------------- */}

@@ -22,7 +22,7 @@ console.log('isMobile view in left page'+ props.isMobileView)
           bgcolor: "rgba(255,255,255,1)",
           boxShadow: "inset -10px 0 20px -5px rgba(0, 0, 0, 0.2)",
           // Subtle shadow
-          borderRadius: !props.isMobileView? "18% 18% 18% 10% / 0% 2% 2% 0%":"none",
+          borderRadius:props.isMobileView?"none": "18% 18% 18% 10% / 0% 2% 2% 0%",
           backgroundImage:`url(${props.number}.png)`,
           backgroundPosition:"center",
           backgroundSize: '100% 100%',

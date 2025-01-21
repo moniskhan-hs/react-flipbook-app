@@ -22,7 +22,7 @@ const RigthPage = React.forwardRef<
           width: width,
           bgcolor: "rgba(255,255,255,1)",
           boxShadow: "inset 10px 0 20px -5px rgba(0, 0, 0, 0.2)", // Left shadow
-          borderRadius: !props.isMobileView? "18% 18% 18% 10% / 0% 2% 2% 0%":"none",
+          borderRadius: props.isMobileView?"none":  "18% 18% 18% 18% / 2% 0% 0% 2%",
           zIndex: 10,
           // padding:"5px"
           backgroundImage:`url(${props.number}.png)`,
