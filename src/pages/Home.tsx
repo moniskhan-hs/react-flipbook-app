@@ -4,6 +4,7 @@ import HTMLFlipBook from "react-pageflip";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import { useDispatch, useSelector } from "react-redux";
 import LeftPage from "../components/LeftPage";
+import NavigationsButtons from "../components/NavigationsButtons";
 import RigthPage from "../components/RigthPage";
 import StackedLeft from "../components/StackedLeft";
 import StackedRigth from "../components/StackedRigth";
@@ -38,12 +39,15 @@ const FlipbookView: React.FC = () => {
 
   // Update total pages when `flipBookRef` or `selectedSize` changes
   useEffect(() => {
-          {/* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */}
+ 
 
+    /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
     if (flipBookRef.current && flipBookRef.current.pageFlip()) {
-          {/* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */}
-
-      setTotalPages(flipBookRef.current.pageFlip().getPageCount());
+      {
+        
+        /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
+        setTotalPages(flipBookRef.current.pageFlip().getPageCount());
+      }
     }
     console.log("home page rendered");
   }, [flipBookRef, height, width]);
@@ -66,6 +70,7 @@ const FlipbookView: React.FC = () => {
     object: { pages: { currentPageIndex: number } };
   }) => {
     conditionRef.current = event.data;
+    setCurrentPage(event.object.pages.currentPageIndex);
   };
 
   // UseLayoutEffect to manage StackedRigth visibility
@@ -206,6 +211,7 @@ const FlipbookView: React.FC = () => {
       )} */}
 
       {/* ------------------------------------------ Wrapper of cover+Book--------------------------------- */}
+
       <Box
         sx={{
           ...(isMobileView
@@ -260,11 +266,10 @@ const FlipbookView: React.FC = () => {
           height={isMobileView && width > height ? "100vw" : height + 20}
           sx={{
             transition: "background-color 0.3s ease",
-            
+
             background: isMobileView
               ? "none"
-              : 
-            `linear-gradient(
+              : `linear-gradient(
                 90deg,
                 #878787 0%,
                 #878787 calc(50% - 30px),
@@ -272,32 +277,23 @@ const FlipbookView: React.FC = () => {
                 #505050 calc(50% + 30px),
                 #878787 calc(50% + 30px)
               )`,
-          // background: isMobileView
-            //   ? "none"
-            //   : currentPage > 0 || currentPage == 3
-            //   ? `linear-gradient(
-            //     90deg,
-            //     #878787 0%,
-            //     #878787 calc(50% - 30px),
-            //     #505050 calc(50% - 30px),
-            //     #505050 calc(50% + 30px),
-            //     #878787 calc(50% + 30px)
-            //   )`
-            //   : "transparent",
-
-
-
 
             position: "relative",
             overflow: "hidden",
-            // zIndex:50
+
+
           }}
+
+         
         >
+
+
+
+
           {!isMobileView && (
             <Box
               sx={{
-                visibility:
-                  currentPage > 5? "visible" : "hidden",
+                visibility: currentPage > 5 ? "visible" : "hidden",
                 cursor: currentPage > 1 ? "none" : "pointer",
               }}
             >
@@ -320,7 +316,7 @@ const FlipbookView: React.FC = () => {
             onFlip={onPageChange}
             ref={flipBookRef}
             onChangeState={onChnageStateOfpage}
-            startPage={isMobileView?0:1}
+            startPage={isMobileView ? 0 : 1}
             flippingTime={isMobileView ? 4500 : 1000}
             // swipeDistance={isMobileView?60:30}
             startZIndex={isMobileView ? 10 : 0}
@@ -338,11 +334,6 @@ const FlipbookView: React.FC = () => {
                 </RigthPage>
               );
             })} */}
-
-
-
-
-
 
             {/* -------------------------------Static Page Viewer------------------------ */}
 
@@ -372,15 +363,40 @@ const FlipbookView: React.FC = () => {
           {!isMobileView && (
             <Box
               sx={{
-                visibility:
-                  currentPage < 8 ? "visible" : "hidden",
+                visibility: currentPage < 8 ? "visible" : "hidden",
               }}
             >
               <StackedRigth />
             </Box>
           )}
         </Stack>
+
+
       </Box>
+
+     {isMobileView && <Box 
+       sx={{
+        position: "fixed", // Fix to the viewport
+        bottom: 0, // Stick to the bottom
+        left: 0, // Align with the left edge
+        width: "100%", // Stretch across the screen
+        bgcolor: "#fff", // Background color
+        boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)", // Top shadow for emphasis
+        p: 2, // Padding
+        display: "flex", // Flexbox for layout
+        justifyContent: "center", // Space between children
+        alignItems: "center", // Vertically center content
+        zIndex: 1000, // Ensure it appears above other content
+      }}
+     
+      >
+
+       {<NavigationsButtons currentPage={currentPage} flipBookRef={flipBookRef}/>}
+      </Box>
+}
+    { !isMobileView && <NavigationsButtons currentPage={currentPage} flipBookRef={flipBookRef}/>}
+
+
     </Box>
   );
 };
