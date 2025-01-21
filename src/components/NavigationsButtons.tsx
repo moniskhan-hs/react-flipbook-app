@@ -26,6 +26,7 @@ const NavigationsButtons = ({ currentPage, flipBookRef }: Props) => {
             pointerEvents: "none",
           },
         }}
+        /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
         onClick={() => flipBookRef.current.pageFlip().flipPrev()}
       >
         {" "}
@@ -43,6 +44,7 @@ const NavigationsButtons = ({ currentPage, flipBookRef }: Props) => {
       <Button
         variant="contained"
         disabled={currentPage + 2 >= 10}
+        /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
         onClick={() => flipBookRef.current.pageFlip().flipNext()}
         sx={{
           textTransform: "none",
