@@ -187,15 +187,15 @@ const FlipbookView: React.FC = () => {
     <Box
       sx={{
         display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
+        flexDirection: isMobileView?"none":"column",
+        alignItems: isMobileView?"none":"center",
+        justifyContent: isMobileView?"none": "center",
         padding: isMobileView ? "2rem" : "1rem", // Padding around the container
 
         width: "100vw", // full width of the screen
         height: "100vh", // full heigth of the screen
         overflow: "hidden",
-        backgroundImage: background
+        backgroundImage:isMobileView? 'none' : background
           ? `url(${background})`
           : `url(/bgTable.avif)`,
         backgroundSize: "cover",
@@ -229,13 +229,18 @@ const FlipbookView: React.FC = () => {
                 }
               : {
                   // ------------------ Normal Pdf uploaded and being view by mobile
-                  height: "100%",
+                  // height: "100%",
                   width: "100%",
-                  bgcolor: "rgba(255,255,255,1)",
-                  display: "flex",
+                  // bgcolor: "rgba(255,255,255,1)",
+                  // display: "flex",
                   // justifyContent: "start",
-                  alignItems: "center",
+                  // alignItems: "center",
                   // mt:"150",
+                  backgroundCcolor: 'red',
+                  display: 'flex',
+              
+                  alignSelf: 'baseline',
+                  marginTop: '10rem',
                   transform: "scale(2.5)",
                 }
             : {
@@ -309,8 +314,10 @@ const FlipbookView: React.FC = () => {
             onChangeState={onChnageStateOfpage}
             startPage={1}
             flippingTime={isMobileView ? 3000 : 1000}
+            swipeDistance={isMobileView?60:30}
+            startZIndex={isMobileView?10:0}
           >
-            <FirstCoverPage>Welcome to my Book</FirstCoverPage>
+            <FirstCoverPage isMobileView={isMobileView} >Welcome</FirstCoverPage>
             {/* ---------------------- Dynamic page viewer---------------------- */}
             {/* {getImagesFromLocalStorage().map((img: string, index: number) => {
               return index % 2 === 0 ? (
@@ -346,7 +353,7 @@ const FlipbookView: React.FC = () => {
               );
             })}
 
-            <PageCover>The End</PageCover>
+            <PageCover isMobileView={isMobileView}>The End</PageCover>
           </HTMLFlipBook>
 
           {!isMobileView && (

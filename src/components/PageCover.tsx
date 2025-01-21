@@ -3,7 +3,10 @@ import React from "react";
 
 const PageCover = React.forwardRef<
   HTMLDivElement,
-  { children: React.ReactNode }
+  { children: React.ReactNode;
+    isMobileView:boolean 
+
+   }
 >((props, ref) => {
   return (
     <div className="page page-cover" ref={ref} data-density="hard">
@@ -13,7 +16,7 @@ const PageCover = React.forwardRef<
         style={{
           backgroundColor: "gray",
           height: "100%",
-          width: "120%",
+          width: props.isMobileView?'100%':"120%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
