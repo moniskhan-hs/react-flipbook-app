@@ -84,9 +84,9 @@ const FlipbookView: React.FC = () => {
   }, [currentPage]);
   // -------------------------------------- PDF Logic----------------------------------------------
 
-  // const getImagesFromLocalStorage = () => {
-  //   return JSON.parse(localStorage.getItem("pdf_images") || "[]");
-  // };
+  const getImagesFromLocalStorage = () => {
+    return JSON.parse(localStorage.getItem("pdf_images") || "[]");
+  };
 
   //------------------------------- Mobile view logic---------------------------
   useEffect(() => {
@@ -323,20 +323,20 @@ const FlipbookView: React.FC = () => {
           >
             {/* <FirstCoverPage isMobileView={isMobileView}>Welcome</FirstCoverPage> */}
             {/* ---------------------- Dynamic page viewer---------------------- */}
-            {/* {getImagesFromLocalStorage().map((img: string, index: number) => {
+            {getImagesFromLocalStorage().map((img: string, index: number) => {
               return index % 2 === 0 ? (
-                <LeftPage number={index + 1} key={index} url={img}>
+                <LeftPage number={index + 1} key={index} url={img} isMobileView = {isMobileView}>
                   Left Page {index + 1}
                 </LeftPage>
               ) : (
-                <RigthPage number={index + 1} key={index} url={img}>
+                <RigthPage number={index + 1} key={index} url={img} isMobileView ={isMobileView}>
                   Right Page {index + 1}
                 </RigthPage>
               );
-            })} */}
+            })}
 
             {/* -------------------------------Static Page Viewer------------------------ */}
-
+{/* 
             {new Array(10).fill("1").map((_, index) => {
               return index % 2 === 0 ? (
                 <LeftPage
@@ -355,7 +355,7 @@ const FlipbookView: React.FC = () => {
                   Right Page {index + 1}
                 </RigthPage>
               );
-            })}
+            })} */}
 
             {/* <PageCover isMobileView={isMobileView}>The End</PageCover> */}
           </HTMLFlipBook>

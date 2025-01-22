@@ -1,4 +1,4 @@
-import { Stack, TextField } from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setbackground } from "../redux/reducers/setBackground";
@@ -21,14 +21,45 @@ const UploadBg = () => {
 
 
   return (
-    <Stack direction="row" spacing={2}>
-      <TextField
-        onChange={handleFileUpload}
-        placeholder="Upload the background image"
-        type="file"
-        size="small"
-        InputLabelProps={{ shrink: true }} // Ensures placeholder works with file input
-      />
+    <Stack direction="column" spacing={2}>
+      <Typography sx={{
+        fontWeight:"bold",
+        fontSize:"1.2rem"
+      }}>Add the background Image</Typography>
+     <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 2,
+        padding: "10px 20px",
+        backgroundColor: "#f5f5f5",
+        borderRadius: "8px",
+        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <Button
+        variant="contained"
+        component="label"
+        startIcon={<i className="fas fa-upload"></i>} // Replace with an upload icon if you want
+        sx={{
+          textTransform: "none",
+          backgroundColor: "#e8f0fe",
+          color: "#1976d2",
+          fontWeight: "bold",
+          borderRadius: "4px",
+          ":hover": { backgroundColor: "#d7e6fd" },
+        }}
+      >
+        Upload Image
+        <input
+          type="file"
+          // accept="application/pdf"
+          onChange={handleFileUpload}
+          hidden
+        />
+      </Button>
+      <span>No file chosen</span>
+    </Box>
     </Stack>
   );
 };

@@ -1,9 +1,15 @@
-import { Button, Stack, Typography } from "@mui/material";
-import React, { useRef, useState } from "react";
+import {
+  Box,
+  Button,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useRef, useState } from "react";
+import { HexColorPicker } from "react-colorful";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-import interiorPdf from "/Pocket.pdf";
 import UploadBg from "../components/UploadBg";
 import { setSelectedSize } from "../redux/reducers/book";
 
@@ -13,12 +19,20 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/$
 const PdfToImages = () => {
   const [numPages, setNumPages] = useState<number>(0);
   const [images, setImages] = useState<
-    { dataUrl: string; width: number; height: number }[]
+  { dataUrl: string; width: number; height: number }[]
   >([]);
+  console.log('images:', images)
   const [file, setFile] = useState<File | null>(null);
-
+  const [pdfUrl, setPdfUrl] = useState(""); // Stores the input URL
+  const [coverColor, setCoverColor] = useState("#aabbcc");
+  const [spineColor, setSpineColor] = useState("#aabbcc");
   const dispatch = useDispatch();
   const processedPages = useRef<Set<number>>(new Set());
+  // const navigate = useNavigate();
+  const [isCoverColorPickerVisible, setIsCoverColorPickerVisible] =
+    useState(true);
+
+  //----------------------- Handlers-----------------------
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -33,14 +47,14 @@ const PdfToImages = () => {
     );
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFile = event.target.files?.[0];
-    if (uploadedFile && uploadedFile.type === "application/pdf") {
-      setFile(uploadedFile);
-    } else {
-      alert("Please upload a valid PDF file.");
-    }
-  };
+  // const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const uploadedFile = event.target.files?.[0];
+  //   if (uploadedFile && uploadedFile.type === "application/pdf") {
+  //     setFile(uploadedFile);
+  //   } else {
+  //     alert("Please upload a valid PDF file.");
+  //   }
+  // };
 
   const capturePageAsImage = (
     pageNumber: number,
@@ -186,68 +200,204 @@ const PdfToImages = () => {
     }, 100);
   };
 
+  // ------------------------------ download pdf from the URL-------------------------
+  const fetchPdf = async () => {
+    try {
+      const response = await fetch(pdfUrl);
+      if (!response.ok) {
+        throw new Error("Failed to fetch PDF");
+      }
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      console.log("blobUrl:", blobUrl);
+          {/* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */}
+      setFile(blobUrl);
+      // navigate("/");
+    } catch (error) {
+      console.error("Error fetching PDF:", error);
+      setFile(null); // Reset file if there's an error
+    }
+  };
+
   return (
-    <div>
-      <Stack
-        direction={"row"}
-        alignItems={"center"}
-        mt={5}
-        gap={5}
-        justifyContent={"center"}
+    <Box
+      sx={{
+        width: "100%",
+        display: "flex",
+      }}
+    >
+      {/* ------------Left size menu------------ */}
+      <Box
+        sx={{
+          width: "30%",
+        }}
       >
-        <Stack direction={"row"} gap={2}>
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={handleFileUpload}
-            style={{ marginBottom: "20px" }}
-          />
+        <Stack
+          // direction={"row"}
+          alignItems={"center"}
+          mt={5}
+          gap={5}
+          justifyContent={"center"}
+        >
+          <Paper elevation={5}>
+            <Stack
+              direction={"column"}
+              gap={2}
+              alignItems={"start"}
+              sx={{
+                padding :'1rem 1.5rem'
+              }}
+            >
+              {/* ------------------Upload pdf file------------------ */}
+              {/* <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                padding: "10px 20px",
+                backgroundColor: "#f5f5f5",
+                borderRadius: "8px",
+                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <Button
+                variant="contained"
+                component="label"
+                startIcon={<i className="fas fa-upload"></i>} // Replace with an upload icon if you want
+                sx={{
+                  textTransform: "none",
+                  backgroundColor: "#e8f0fe",
+                  color: "#1976d2",
+                  fontWeight: "bold",
+                  borderRadius: "4px",
+                  ":hover": { backgroundColor: "#d7e6fd" },
+                }}
+              >
+                Upload File
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleFileUpload}
+                  hidden
+                />
+              </Button>
+              <span>No file chosen</span>
+            </Box> */}
+              <Typography
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1.2rem",
+                }}
+              >
+                Paste your PDF link here
+              </Typography>
+              <TextField
+                fullWidth
+                value={pdfUrl}
+                onChange={(e) => setPdfUrl(e.target.value)}
+                placeholder="Enter pdf url link"
+                size="small"
+              />
+              {/* --------------------- upload the backround image ------------------------------- */}
+              <UploadBg />
+
+              <Typography
+                sx={{
+                  fontWeight: "bold",
+                  fontSize: "1.2rem",
+                }}
+              >
+                Choose the color of{" "}
+                {isCoverColorPickerVisible ? "'cover'" : "'spine'"}
+              </Typography>
+              <Stack direction={"row"} gap={1} width={"100%"}>
+                <Button
+                  variant={isCoverColorPickerVisible ? "contained" : "text"}
+                  sx={{
+                    flex: 1,
+                    bgcolor: coverColor,
+                  }}
+                  onClick={() => {
+                    setIsCoverColorPickerVisible(true);
+                  }}
+                >
+                  Cover
+                </Button>
+                <Button
+                  // variant={!isCoverColorPickerVisible ? "contained" : "text"}
+                  sx={{
+                    flex: 1,
+                    bgcolor: spineColor,
+                  }}
+                  onClick={() => {
+                    setIsCoverColorPickerVisible(false);
+                  }}
+                >
+                  Spine
+                </Button>
+              </Stack>
+
+              {/* ----------------------- set the cover color---------------------------- */}
+              <Box mx={"auto"}>
+                <HexColorPicker
+                  color={isCoverColorPickerVisible ? coverColor : spineColor}
+                  onChange={
+                    isCoverColorPickerVisible ? setCoverColor : setSpineColor
+                  }
+                />
+              </Box>
+
+              {/* -------------------------- Save button---------------------------------- */}
+              <Button
+                variant="contained"
+                sx={{
+                  textTransform: "none",
+                  paddingInline: "2rem",
+                  borderRadius: "1.6rem",
+                  my: 2,
+                  mx: "auto",
+                }}
+                onClick={fetchPdf}
+              >
+                Save Changes
+              </Button>
+            </Stack>
+          </Paper>
+
+          {/* -------------------set background image----------------- */}
+
+          {/* <Link to={"/"}> */}
+
+          {/* </Link> */}
         </Stack>
 
-        <UploadBg />
-
-        <Link to={"/"}>
-          <Button
-            variant="contained"
-            sx={{
-              textTransform: "none",
-              paddingInline: "2rem",
-            }}
+        {file ? (
+          <Document
+            // file={interiorPdf} //static pdf for demo purpose
+            file={file} // dynamic pdf upload
+            onLoadSuccess={onDocumentLoadSuccess}
+            loading={<p>Loading PDF...</p>}
+            error={<p>Failed to load PDF.</p>}
           >
-            Home
-          </Button>
-        </Link>
-      </Stack>
+            {Array.from({ length: numPages }, (_, i) => (
+              <div key={i}>
+                <Typography>Rendering Page {i + 1}</Typography>
+                <Page
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  pageNumber={i + 1}
+                  canvasRef={(canvas) => capturePageAsImage(i + 1, canvas)}
+                />
+              </div>
+            ))}
+          </Document>
+        ) : (
+          <Typography textAlign={"center"} mt={5}>
+            Please upload a valid PDF file to view it.
+          </Typography>
+        )}
 
-      {file ? (
-        <Document
-          file={interiorPdf} //static pdf for demo purpose
-          // file={file}    // dynamic pdf upload
-          onLoadSuccess={onDocumentLoadSuccess}
-          loading={<p>Loading PDF...</p>}
-          error={<p>Failed to load PDF.</p>}
-        >
-          {Array.from({ length: numPages }, (_, i) => (
-            <div key={i}>
-              <Typography>Rendering Page {i + 1}</Typography>
-              <Page
-                renderTextLayer={false}
-                renderAnnotationLayer={false}
-                pageNumber={i + 1}
-                canvasRef={(canvas) => capturePageAsImage(i + 1, canvas)}
-              />
-            </div>
-          ))}
-        </Document>
-      ) : (
-        <Typography textAlign={"center"} mt={5}>
-          Please upload a valid PDF file to view it.
-        </Typography>
-      )}
-
-
-
-      <div style={{ marginTop: 20, textAlign: "center" }}>
+        {/* <div style={{ marginTop: 20, textAlign: "center" }}>
         <Typography variant="h6">Extracted Images:</Typography>
         {images.length > 0 ? (
           images.map(({ dataUrl, width, height }, index) => (
@@ -265,10 +415,41 @@ const PdfToImages = () => {
         ) : (
           <p>No images available yet.</p>
         )}
-      </div>
-    </div>
+      </div> */}
+      </Box>
+      {/* -----------------Preview Section---------------- */}
+      <Box
+        sx={{
+          flex: 1,
+        }}
+      >
+        <Stack direction={"row"} justifyContent={"end"} alignItems={"center"}>
+          <Button
+            variant="contained"
+            sx={{
+              textTransform: "none",
+              paddingInline: "2rem",
+              borderRadius: "1.6rem",
+              bgcolor: "lightblue",
+              color: "black",
+              m: 2,
+            }}
+          >
+            Copy URL
+          </Button>
+        </Stack>
+
+        <Box height={"100%"}>
+          <iframe
+            src={`http://localhost:5173/?t=${Date.now()}`}
+            style={{ width: "100%", height: "90vh", border: "none" }}
+            sandbox="allow-scripts allow-same-origin"
+            title="Iframe Example"
+          ></iframe>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
 export default PdfToImages;
-

@@ -27,7 +27,8 @@ const LeftPage = React.forwardRef<
           borderRadius: props.isMobileView
             ? "none"
             : "18% 18% 18% 10% / 0% 2% 2% 0%",
-          backgroundImage: `url(${props.number}.png)`,
+          // backgroundImage: `url(${props.number}.png)`, //static view
+          backgroundImage: `url(${props.url})`,
           backgroundPosition: "center",
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",

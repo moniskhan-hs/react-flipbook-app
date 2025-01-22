@@ -28,7 +28,8 @@ const RigthPage = React.forwardRef<
             ? "none"
             : "18% 18% 18% 18% / 2% 0% 0% 2%",
           zIndex: 10,
-          backgroundImage: `url(${props.number}.png)`,
+          // backgroundImage: `url(${props.number}.png)`, / static 
+          backgroundImage: `url(${props.url})`,
           backgroundPosition: "center",
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",
