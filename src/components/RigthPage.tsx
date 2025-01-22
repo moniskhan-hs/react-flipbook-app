@@ -39,25 +39,7 @@ const RigthPage = React.forwardRef<
           overflow: "hidden",
         }}
       >
-        <Box
-          sx={{
-            backgroundColor: "rgb(216, 132, 29)", 
-            zIndex: 10,
-            borderRadius: "100px",
-            height: "0.7rem",
-            width: "0.7rem",
-            padding: "0.2rem",
-            color:"black",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: "0.5rem",
-            mb: 0.5,
-            mr: 0.5,
-          }}
-        >
-          {props.number}
-        </Box>
+     
       </Box>
 
       {/* Right Fluted Panel */}

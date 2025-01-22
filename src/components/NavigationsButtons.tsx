@@ -30,7 +30,7 @@ const NavigationsButtons = ({ currentPage, flipBookRef }: Props) => {
         onClick={() => flipBookRef.current.pageFlip().flipPrev()}
       >
         {" "}
-        Pre
+        Prev
       </Button>
       <Box
         mx={2}
