@@ -1,4 +1,4 @@
-import { Box, Stack, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Button, Stack, useMediaQuery, useTheme } from "@mui/material";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
@@ -9,6 +9,7 @@ import RigthPage from "../components/RigthPage";
 import StackedLeft from "../components/StackedLeft";
 import StackedRigth from "../components/StackedRigth";
 import { setSelectedSize } from "../redux/reducers/book";
+import { Link } from "react-router-dom";
 
 const FlipbookView: React.FC = () => {
   // const flipBookRef = useRef<HTMLFlipBookRef | null>(null);
@@ -39,12 +40,9 @@ const FlipbookView: React.FC = () => {
 
   // Update total pages when `flipBookRef` or `selectedSize` changes
   useEffect(() => {
- 
-
     /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
     if (flipBookRef.current && flipBookRef.current.pageFlip()) {
       {
-        
         /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
         setTotalPages(flipBookRef.current.pageFlip().getPageCount());
       }
@@ -199,7 +197,7 @@ const FlipbookView: React.FC = () => {
     >
       {/* ------------------------------ Pdf Upload Button-------------------------------- */}
 
-      {/* {!isMobileView && (
+      {!isMobileView && (
         <Link
           to={"/upload"}
           style={{
@@ -208,7 +206,7 @@ const FlipbookView: React.FC = () => {
         >
           <Button variant="contained">Go to Upload</Button>
         </Link>
-      )} */}
+      )}
 
       {/* ------------------------------------------ Wrapper of cover+Book--------------------------------- */}
 
@@ -280,16 +278,8 @@ const FlipbookView: React.FC = () => {
 
             position: "relative",
             overflow: "hidden",
-
-
           }}
-
-         
         >
-
-
-
-
           {!isMobileView && (
             <Box
               sx={{
@@ -325,18 +315,28 @@ const FlipbookView: React.FC = () => {
             {/* ---------------------- Dynamic page viewer---------------------- */}
             {getImagesFromLocalStorage().map((img: string, index: number) => {
               return index % 2 === 0 ? (
-                <LeftPage number={index + 1} key={index} url={img} isMobileView = {isMobileView}>
+                <LeftPage
+                  number={index + 1}
+                  key={index}
+                  url={img}
+                  isMobileView={isMobileView}
+                >
                   Left Page {index + 1}
                 </LeftPage>
               ) : (
-                <RigthPage number={index + 1} key={index} url={img} isMobileView ={isMobileView}>
+                <RigthPage
+                  number={index + 1}
+                  key={index}
+                  url={img}
+                  isMobileView={isMobileView}
+                >
                   Right Page {index + 1}
                 </RigthPage>
               );
             })}
 
             {/* -------------------------------Static Page Viewer------------------------ */}
-{/* 
+            {/* 
             {new Array(10).fill("1").map((_, index) => {
               return index % 2 === 0 ? (
                 <LeftPage
@@ -370,33 +370,38 @@ const FlipbookView: React.FC = () => {
             </Box>
           )}
         </Stack>
-
-
       </Box>
 
-     {isMobileView && <Box 
-       sx={{
-        position: "fixed", // Fix to the viewport
-        bottom: 0, // Stick to the bottom
-        left: 0, // Align with the left edge
-        width: "100%", // Stretch across the screen
-        bgcolor: "#fff", // Background color
-        boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)", // Top shadow for emphasis
-        p: 2, // Padding
-        display: "flex", // Flexbox for layout
-        justifyContent: "center", // Space between children
-        alignItems: "center", // Vertically center content
-        zIndex: 1000, // Ensure it appears above other content
-      }}
-     
-      >
-
-       {<NavigationsButtons currentPage={currentPage} flipBookRef={flipBookRef}/>}
-      </Box>
-}
-    { !isMobileView && <NavigationsButtons currentPage={currentPage} flipBookRef={flipBookRef}/>}
-
-
+      {isMobileView && (
+        <Box
+          sx={{
+            position: "fixed", // Fix to the viewport
+            bottom: 0, // Stick to the bottom
+            left: 0, // Align with the left edge
+            width: "100%", // Stretch across the screen
+            bgcolor: "#fff", // Background color
+            boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)", // Top shadow for emphasis
+            p: 2, // Padding
+            display: "flex", // Flexbox for layout
+            justifyContent: "center", // Space between children
+            alignItems: "center", // Vertically center content
+            zIndex: 1000, // Ensure it appears above other content
+          }}
+        >
+          {
+            <NavigationsButtons
+              currentPage={currentPage}
+              flipBookRef={flipBookRef}
+            />
+          }
+        </Box>
+      )}
+      {!isMobileView && (
+        <NavigationsButtons
+          currentPage={currentPage}
+          flipBookRef={flipBookRef}
+        />
+      )}
     </Box>
   );
 };
