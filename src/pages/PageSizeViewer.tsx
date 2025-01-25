@@ -1,38 +1,43 @@
-import {
-  Box,
-  Button,
-  Paper,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { Box, Button, CircularProgress, Paper, Stack, Typography } from "@mui/material";
+import { addDoc, collection } from "firebase/firestore";
 import { useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useDispatch } from "react-redux";
 import UploadBg from "../components/UploadBg";
+import { db } from "../firebase";
 import { setSelectedSize } from "../redux/reducers/book";
-
+import { setbackground } from "../redux/reducers/setBackground";
+import {
+  createUniqueName,
+  uploadImageOnFirebase,
+} from "../utils/upload/fire-base-storage";
+import FlipbookView from "./Flipbook";
+import { adjustColorBrightness } from "../utils/features";
 // Set the worker for PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const PdfToImages = () => {
   const [numPages, setNumPages] = useState<number>(0);
   const [images, setImages] = useState<
-  { dataUrl: string; width: number; height: number }[]
+    { dataUrl: string; width: number; height: number }[]
   >([]);
-  console.log('images:', images)
   const [file, setFile] = useState<File | null>(null);
-  const [pdfUrl, setPdfUrl] = useState(""); // Stores the input URL
   const [coverColor, setCoverColor] = useState("#aabbcc");
-  const [spineColor, setSpineColor] = useState("#aabbcc");
   const dispatch = useDispatch();
   const processedPages = useRef<Set<number>>(new Set());
   // const navigate = useNavigate();
   const [isCoverColorPickerVisible, setIsCoverColorPickerVisible] =
     useState(true);
+  const [backgroundImage, setBackgroundImage] = useState<string | null>();
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading,setIsLoading] = useState(false)
+  const [uniqueBookId, seetUniqueBookId] = useState<string>();
+  const [heigthOfBook, setHeigthOfBook] = useState<number>();
+  const [widthOfBook, setWidthOfBook] = useState<number>();
+  //---------------------- Globals variables ----------------------
 
-  //----------------------- Handlers-----------------------
+  //----------------------- A L L   M E T H O D S   OR   H A N D L E R S -----------------------
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -46,15 +51,18 @@ const PdfToImages = () => {
       })
     );
   };
+  // ---------------------------------- method to upload the PDF--------------
 
-  // const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const uploadedFile = event.target.files?.[0];
-  //   if (uploadedFile && uploadedFile.type === "application/pdf") {
-  //     setFile(uploadedFile);
-  //   } else {
-  //     alert("Please upload a valid PDF file.");
-  //   }
-  // };
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFile = event.target.files?.[0];
+    if (uploadedFile && uploadedFile.type === "application/pdf") {
+      setFile(uploadedFile);
+    } else {
+      alert("Please upload a valid PDF file.");
+    }
+  };
+
+  // ---------------------------------- method to capute the imgage of each PDF's page------------------
 
   const capturePageAsImage = (
     pageNumber: number,
@@ -62,19 +70,14 @@ const PdfToImages = () => {
   ) => {
     if (!canvas || processedPages.current.has(pageNumber)) return;
 
-    // const width = canvas.width;
-    // console.log('canvas.width:', canvas.width)
-    // const height = canvas.height;
-    // console.log('canvas.height:', canvas.height)
     processedPages.current.add(pageNumber); // Mark page as processed
 
     // Ensure canvas is ready
     setTimeout(() => {
       const dataUrl = canvas.toDataURL("image/png", 1.0); // High-quality image
       const { width, height } = canvas;
-      console.log("height inside the setTimout :", height);
-      console.log("width inside the setTimout:", width);
-
+      setHeigthOfBook(height);
+      setWidthOfBook(width);
       // --------------------------------------------------------------------------
       const aspectRationofScreen = window.innerWidth / window.innerHeight;
       console.log("aspectRationofScreen:", aspectRationofScreen);
@@ -193,6 +196,7 @@ const PdfToImages = () => {
       const storedImages = JSON.parse(
         localStorage.getItem("pdf_images") || "[]"
       );
+
       storedImages[pageNumber - 1] = dataUrl;
       localStorage.setItem("pdf_images", JSON.stringify(storedImages));
       console.log(`Page ${pageNumber} saved to localStorage.`);
@@ -200,56 +204,118 @@ const PdfToImages = () => {
     }, 100);
   };
 
-  // ------------------------------ download pdf from the URL-------------------------
-  const fetchPdf = async () => {
-    try {
-      const response = await fetch(pdfUrl);
-      if (!response.ok) {
-        throw new Error("Failed to fetch PDF");
-      }
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      console.log("blobUrl:", blobUrl);
-          {/* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */}
-      setFile(blobUrl);
-      // navigate("/");
-    } catch (error) {
-      console.error("Error fetching PDF:", error);
-      setFile(null); // Reset file if there's an error
+  // ---------------------------------- Handle to change the background image---------------------
+
+  const hanldeBackgroundChange = (value: string | null) => {
+    if (value) {
+      setBackgroundImage(value);
+      dispatch(setbackground(value));
+    } else {
+      console.log("no background images is selected");
     }
   };
+  // ---------------------------------- method to upload the images and  background image on firestore---------------
+
+  const uploadToFirebase = async () => {
+    //steps
+    // 1. post the images on firestorage
+    // 2.and then post on cloud storage with downloadbale URL and
+    const bookName = file && file.name;
+  setIsLoading(true)
+  setIsSuccess(false)
+    if (file) {
+      // Use Promise.all with map to wait for all uploads to finish
+      const uploadedImages: string[] = await Promise.all(
+        images.map(async (ele) => {
+          try {
+            const downloadLink = await uploadImageOnFirebase(
+              ele.dataUrl,
+              bookName as string
+            );
+            return downloadLink; // Return the download link for Promise.all to resolve
+          } catch (err) {
+            console.log("err", err);
+            return ""; // Handle errors gracefully (optional: filter later)
+          }
+        })
+      );
+
+      let backgroundImageURl;
+
+      if (backgroundImage) {
+        backgroundImageURl = await uploadImageOnFirebase(
+          backgroundImage,
+          bookName as string
+        );
+      }
+
+      // Post the data to Firestore
+      const docRef = await addDoc(collection(db, "flipbooks"), {
+        name: bookName, // book Name
+        images: uploadedImages, // All uploaded images
+        background: backgroundImageURl || "", // Background image
+        heigthOfBook,
+        widthOfBook,
+        coverColor,
+        spineColor,
+      });
+
+      //  res.id = unique book id ==> wil be saved in URL to get the sharable link
+      seetUniqueBookId(docRef.id as string);
+
+      console.log("Data successfully added to Firestore");
+      setIsSuccess(true);
+      setIsLoading(false)
+    } else {
+      console.error("No file provided!");
+      setIsSuccess(false);
+    }
+  };
+
+  // ---------------------------------- method to copy the url into clipboard ---------------
+  const spineColor = adjustColorBrightness(coverColor, 0.5);
+  console.log("spineColor:", spineColor);
 
   return (
     <Box
       sx={{
-        width: "100%",
+        width: "100vw",
         display: "flex",
+        padding: "0rem 2rem ",
       }}
     >
       {/* ------------Left size menu------------ */}
       <Box
         sx={{
-          width: "30%",
+          width: "20%",
+          overflow: "auto",
+          // padding={'1rem 0.5rem'}
         }}
       >
         <Stack
           // direction={"row"}
+          display={"flex"}
           alignItems={"center"}
-          mt={5}
           gap={5}
+          border={"1px solid rgba(0, 0, 0, 0.25)"}
           justifyContent={"center"}
+          sx={{
+            borderRadius:"8px",
+            padding: "1rem 1.3rem",
+            mt: 2,
+          }}
         >
-          <Paper elevation={5}>
-            <Stack
-              direction={"column"}
-              gap={2}
-              alignItems={"start"}
+          <Stack direction={"column"} gap={2} alignItems={"start"} sx={{}}>
+            <Typography
               sx={{
-                padding :'1rem 1.5rem'
+                fontWeight: "bold",
+                fontSize: "1rem",
               }}
             >
-              {/* ------------------Upload pdf file------------------ */}
-              {/* <Box
+              Upload the PDF{" "}
+            </Typography>
+            {/* ------------------Upload pdf file------------------ */}
+            <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -263,7 +329,7 @@ const PdfToImages = () => {
               <Button
                 variant="contained"
                 component="label"
-                startIcon={<i className="fas fa-upload"></i>} // Replace with an upload icon if you want
+                startIcon={<i className="fas fa-upload"></i>}
                 sx={{
                   textTransform: "none",
                   backgroundColor: "#e8f0fe",
@@ -282,120 +348,122 @@ const PdfToImages = () => {
                 />
               </Button>
               <span>No file chosen</span>
-            </Box> */}
-              <Typography
-                sx={{
-                  fontWeight: "bold",
-                  fontSize: "1.2rem",
-                }}
-              >
-                Paste your PDF link here
-              </Typography>
-              <TextField
-                fullWidth
-                value={pdfUrl}
-                onChange={(e) => setPdfUrl(e.target.value)}
-                placeholder="Enter pdf url link"
-                size="small"
-              />
-              {/* --------------------- upload the backround image ------------------------------- */}
-              <UploadBg />
+            </Box>
 
-              <Typography
+            {/* --------------------- upload the backround image ------------------------------- */}
+            <UploadBg onBackgroundChange={hanldeBackgroundChange} />
+            <Typography
+              sx={{
+                fontWeight: "bold",
+                fontSize: "1rem",
+              }}
+            >
+              Choose the color
+            </Typography>
+
+            <Stack direction={"row"} gap={1} width={"100%"}>
+              <Box
                 sx={{
-                  fontWeight: "bold",
-                  fontSize: "1.2rem",
+                  flex: 1,
                 }}
               >
-                Choose the color of{" "}
-                {isCoverColorPickerVisible ? "'cover'" : "'spine'"}
-              </Typography>
-              <Stack direction={"row"} gap={1} width={"100%"}>
+                <Typography variant="subtitle2" fontWeight={"bold"}>
+                  Cover
+                </Typography>
+
                 <Button
                   variant={isCoverColorPickerVisible ? "contained" : "text"}
                   sx={{
-                    flex: 1,
+                    width: "2rem",
+                    height: "2rem",
                     bgcolor: coverColor,
                   }}
                   onClick={() => {
                     setIsCoverColorPickerVisible(true);
                   }}
-                >
-                  Cover
-                </Button>
-                <Button
-                  // variant={!isCoverColorPickerVisible ? "contained" : "text"}
-                  sx={{
-                    flex: 1,
-                    bgcolor: spineColor,
-                  }}
-                  onClick={() => {
-                    setIsCoverColorPickerVisible(false);
-                  }}
-                >
-                  Spine
-                </Button>
-              </Stack>
-
-              {/* ----------------------- set the cover color---------------------------- */}
-              <Box mx={"auto"}>
-                <HexColorPicker
-                  color={isCoverColorPickerVisible ? coverColor : spineColor}
-                  onChange={
-                    isCoverColorPickerVisible ? setCoverColor : setSpineColor
-                  }
-                />
+                ></Button>
               </Box>
 
-              {/* -------------------------- Save button---------------------------------- */}
-              <Button
-                variant="contained"
+              <Box
                 sx={{
-                  textTransform: "none",
-                  paddingInline: "2rem",
-                  borderRadius: "1.6rem",
-                  my: 2,
-                  mx: "auto",
+                  flex: 1,
                 }}
-                onClick={fetchPdf}
               >
-                Save Changes
-              </Button>
+                <Typography variant="subtitle2" fontWeight={"bold"}>
+                  Spine
+                </Typography>
+                <Button
+                  disabled
+                  sx={{
+                    width: "2rem",
+                    height: "2rem",
+                    bgcolor: adjustColorBrightness(coverColor, 0.5),
+                    //0.5=== 50% darker
+                  }}
+                ></Button>
+              </Box>
             </Stack>
-          </Paper>
+
+            {/* ----------------------- set the cover color---------------------------- */}
+            <Box mx={"auto"}>
+              <HexColorPicker color={coverColor} onChange={setCoverColor} />
+            </Box>
+
+            {/* -------------------------- Save button---------------------------------- */}
+            <Button
+              variant="outlined"
+              sx={{
+                textTransform: "none",
+                paddingInline: "2rem",
+                borderRadius: "1.6rem",
+                my: 2,
+                mx: "auto",
+              }}
+              onClick={uploadToFirebase}
+            >
+            
+            {isLoading ? (
+          <CircularProgress/>
+        ) : isSuccess ? (
+          "Success!"
+        ) : (
+          "Save Changes"
+        )}
+   
+            </Button>
+          </Stack>
 
           {/* -------------------set background image----------------- */}
-
-          {/* <Link to={"/"}> */}
-
-          {/* </Link> */}
         </Stack>
 
-        {file ? (
-          <Document
-            // file={interiorPdf} //static pdf for demo purpose
-            file={file} // dynamic pdf upload
-            onLoadSuccess={onDocumentLoadSuccess}
-            loading={<p>Loading PDF...</p>}
-            error={<p>Failed to load PDF.</p>}
-          >
-            {Array.from({ length: numPages }, (_, i) => (
-              <div key={i}>
-                <Typography>Rendering Page {i + 1}</Typography>
-                <Page
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
-                  pageNumber={i + 1}
-                  canvasRef={(canvas) => capturePageAsImage(i + 1, canvas)}
-                />
-              </div>
-            ))}
-          </Document>
-        ) : (
-          <Typography textAlign={"center"} mt={5}>
-            Please upload a valid PDF file to view it.
-          </Typography>
-        )}
+        {/* ---------------------- render the pdf pages [display none ] */}
+        <Box display={"none"}>
+          {file ? (
+            <Document
+              // file={interiorPdf} //static pdf for demo purpose
+              file={file} // dynamic pdf upload
+              onLoadSuccess={onDocumentLoadSuccess}
+              loading={<p>Loading PDF...</p>}
+              error={<p>Failed to load PDF.</p>}
+            >
+              {Array.from({ length: numPages }, (_, i) => (
+                <div key={i}>
+                  <Typography>Rendering Page {i + 1}</Typography>
+                  <Page
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                    pageNumber={i + 1}
+                    canvasRef={(canvas) => capturePageAsImage(i + 1, canvas)}
+                  />
+                </div>
+              ))}
+            </Document>
+          ) : (
+            <Typography textAlign={"center"} mt={5}>
+              Please upload a valid PDF file to view it.
+            </Typography>
+          )}
+        </Box>
 
         {/* <div style={{ marginTop: 20, textAlign: "center" }}>
         <Typography variant="h6">Extracted Images:</Typography>
@@ -417,35 +485,53 @@ const PdfToImages = () => {
         )}
       </div> */}
       </Box>
+
       {/* -----------------Preview Section---------------- */}
       <Box
         sx={{
           flex: 1,
+          overflow: "auto",
         }}
       >
         <Stack direction={"row"} justifyContent={"end"} alignItems={"center"}>
           <Button
             variant="contained"
+            disabled={!isSuccess}
             sx={{
               textTransform: "none",
               paddingInline: "2rem",
               borderRadius: "1.6rem",
               bgcolor: "lightblue",
               color: "black",
-              m: 2,
+              mt: 1,
             }}
+            onClick={() =>
+              navigator.clipboard.writeText(
+                `http://localhost:5173/book/bookId/${uniqueBookId}`
+              )
+            }
           >
             Copy URL
           </Button>
         </Stack>
 
-        <Box height={"100%"}>
-          <iframe
-            src={`http://localhost:5173/?t=${Date.now()}`}
-            style={{ width: "100%", height: "90vh", border: "none" }}
-            sandbox="allow-scripts allow-same-origin"
-            title="Iframe Example"
-          ></iframe>
+        <Box
+          sx={{
+            // transform: "scale(0.9)",
+            transformOrigin: "top",
+            width: "100%",
+            height: "100%",
+            overflow: "auto",
+            mb: 3,
+          }}
+        >
+          <FlipbookView
+            isFetchingData={false}
+            images={images}
+            backgroundTemp={backgroundImage}
+            coverColor={coverColor}
+            spineColor={spineColor}
+          />
         </Box>
       </Box>
     </Box>

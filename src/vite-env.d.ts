@@ -28,3 +28,20 @@ type BookStateInitState  =  { width: number; height: number }
       turnToPage: (pageIndex: number) => void;
     };
   };
+
+
+  type BookDataFromFirestoreType = {
+    name: string, 
+    images: string[], 
+    background: string, 
+    heigthOfBook:number,
+    widthOfBook:number,
+    coverColor:string;
+    spineColor:string;
+  }
+
+  type ImagesType = {
+    dataUrl: string;
+    width: number;
+    height: number;
+}[]

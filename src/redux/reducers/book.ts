@@ -11,8 +11,9 @@ export const bookReducer = createSlice({
   initialState,
   reducers: {
     setSelectedSize(state, action) {
-      state.width = action.payload.width;
-      state.height = action.payload.height
+      state.width = action.payload.width || 450;
+      state.height = action.payload.height || 600
+      console.log("setSelectedSize called+++++++++")
     },
   },
 });

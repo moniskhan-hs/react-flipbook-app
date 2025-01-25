@@ -14,8 +14,10 @@ const LeftPage = React.forwardRef<
   const { width, height } = useSelector(
     (state: { book: BookStateInitState }) => state.book
   );
-
-  console.log("isMobile view in left page" + props.isMobileView);
+  console.log("isMobile view in left page ", props.isMobileView);
+  console.log('width:', width)
+  console.log('height:', height)
+  
   return (
     <div style={{ display: "flex", flexDirection: "row" }} ref={ref}>
       <Box

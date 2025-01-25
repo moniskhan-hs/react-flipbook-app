@@ -5,7 +5,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
   
   const initialState: BackgroundInitStateTyoe = {
-    background: null, // Default value
+    background: null, 
   };
 
 export const backgroundReducer = createSlice({
@@ -13,6 +13,7 @@ export const backgroundReducer = createSlice({
   initialState,
   reducers: {
     setbackground(state, action) {
+      console.log('background reducer called')
       state.background = action.payload
      
     },
