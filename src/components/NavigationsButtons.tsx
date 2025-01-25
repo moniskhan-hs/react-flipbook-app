@@ -50,7 +50,7 @@ const NavigationsButtons = ({ currentPage, flipBookRef,coverColor,spineColor ,to
       </Box>
       <Button
         variant="contained"
-        disabled={currentPage + 2 >= {totalPage}}
+        disabled={currentPage + 2 >= totalPage!}
         /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
         onClick={() => flipBookRef.current.pageFlip().flipNext()}
         sx={{
