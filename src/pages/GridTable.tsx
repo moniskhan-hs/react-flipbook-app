@@ -47,7 +47,7 @@ export default function GridTable() {
           <IconButton
             onClick={(e) => {
               e.stopPropagation(); // Prevent row selection when clicking the icon
-              window.open(params.row.link, "_blank");
+              window.open( `${import.meta.env.VITE_DEV_URL}/${params.row.link}`, "_blank");
             }}
           >
             <Launch />

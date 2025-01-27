@@ -14,7 +14,7 @@ import {
 } from "firebase/auth";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 
 const LoginPage = () => {
@@ -199,6 +199,26 @@ const LoginPage = () => {
           </Box>
         </Stack>
       </Box>
+
+
+      <Stack direction={'row'} justifyContent={'end'} gap={1}>
+        
+        <Box>
+
+        <Link to={
+          '/upload'
+        }>
+
+          upload
+        </Link>
+        <Link to={
+          '/table'
+        }>
+
+          Table
+        </Link>
+          </Box>
+         </Stack>
     </Box>
   );
 };

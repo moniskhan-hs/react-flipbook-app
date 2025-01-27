@@ -25,7 +25,7 @@ const Header = ({ isSuccess, title, url, isCopy = true }: Props) => {
         }}
         onClick={() =>
           isCopy
-            ? navigator.clipboard.writeText(`http://localhost:5173/${url}`)
+            ? navigator.clipboard.writeText(`${import.meta.env.VITE_DEV_URL}${url}`)
             : navigate(url)
         }
       >
