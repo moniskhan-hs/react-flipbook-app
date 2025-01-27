@@ -1,5 +1,4 @@
 import { Button, Stack } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
 
 type Props = {
   url: string;
@@ -9,7 +8,6 @@ type Props = {
 };
 
 const Header = ({ isSuccess, title, url, isCopy = true }: Props) => {
-  const navigate = useNavigate();
   return (
     <Stack direction={"row"} justifyContent={"end"} alignItems={"center"}>
       <Button
