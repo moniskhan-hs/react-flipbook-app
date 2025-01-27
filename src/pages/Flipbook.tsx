@@ -429,7 +429,11 @@ const FlipbookView = ({
     document.body.style.overflow = isDesktopMobileViewd ? "auto" : "hidden";
   }, [isDesktopMobileViewd]); // Re-run whenever isOverflowHidden changes
 
+
+  // --------------- showing the loader----------------------------
   if (isFetchingData && bookid && loading) return <Loader></Loader>;
+
+
 
   return (
     <Box

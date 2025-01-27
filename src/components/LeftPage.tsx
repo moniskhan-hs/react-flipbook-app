@@ -21,6 +21,7 @@ const LeftPage = React.forwardRef<
   return (
     <div style={{ display: "flex", flexDirection: "row" }} ref={ref}>
       <Box
+        
         sx={{
           height: height,
           width: width,

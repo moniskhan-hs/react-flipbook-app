@@ -48,7 +48,7 @@ const appFirestore = initializeApp(firebaseFlipBook, "firestoreApp"); // initili
 // Services
 const storage = getStorage(appStorage);
 const db = getFirestore(appFirestore);
-const auth = getAuth(appFirestore)
+const auth = getAuth(appStorage)
 
 export { auth, db, storage };
 
