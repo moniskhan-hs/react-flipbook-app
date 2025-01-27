@@ -1,5 +1,5 @@
 import { Button, Stack } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 type Props = {
   url: string;
@@ -25,8 +25,8 @@ const Header = ({ isSuccess, title, url, isCopy = true }: Props) => {
         }}
         onClick={() =>
           isCopy
-            ? navigator.clipboard.writeText(`${import.meta.env.VITE_DEV_URL}${url}`)
-            : navigate(url)
+            ? navigator.clipboard.writeText(`${import.meta.env.VITE_DEV_URL}/${url}`)
+            :  window.open( `${import.meta.env.VITE_DEV_URL}${url}`)
         }
       >
         {title}
