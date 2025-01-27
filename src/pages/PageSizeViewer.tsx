@@ -1,4 +1,10 @@
-import { Box, Button, CircularProgress, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography
+} from "@mui/material";
 import { addDoc, collection } from "firebase/firestore";
 import { useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
@@ -8,12 +14,12 @@ import UploadBg from "../components/UploadBg";
 import { db } from "../firebase";
 import { setSelectedSize } from "../redux/reducers/book";
 import { setbackground } from "../redux/reducers/setBackground";
+import Header from "../Shared/Header";
+import { adjustColorBrightness } from "../utils/features";
 import {
-  createUniqueName,
-  uploadImageOnFirebase,
+  uploadImageOnFirebase
 } from "../utils/upload/fire-base-storage";
 import FlipbookView from "./Flipbook";
-import { adjustColorBrightness } from "../utils/features";
 // Set the worker for PDF.js
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -31,7 +37,7 @@ const PdfToImages = () => {
     useState(true);
   const [backgroundImage, setBackgroundImage] = useState<string | null>();
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isLoading,setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
   const [uniqueBookId, seetUniqueBookId] = useState<string>();
   const [heigthOfBook, setHeigthOfBook] = useState<number>();
   const [widthOfBook, setWidthOfBook] = useState<number>();
@@ -221,8 +227,8 @@ const PdfToImages = () => {
     // 1. post the images on firestorage
     // 2.and then post on cloud storage with downloadbale URL and
     const bookName = file && file.name;
-  setIsLoading(true)
-  setIsSuccess(false)
+    setIsLoading(true);
+    setIsSuccess(false);
     if (file) {
       // Use Promise.all with map to wait for all uploads to finish
       const uploadedImages: string[] = await Promise.all(
@@ -265,7 +271,7 @@ const PdfToImages = () => {
 
       console.log("Data successfully added to Firestore");
       setIsSuccess(true);
-      setIsLoading(false)
+      setIsLoading(false);
     } else {
       console.error("No file provided!");
       setIsSuccess(false);
@@ -275,6 +281,8 @@ const PdfToImages = () => {
   // ---------------------------------- method to copy the url into clipboard ---------------
   const spineColor = adjustColorBrightness(coverColor, 0.5);
   console.log("spineColor:", spineColor);
+
+  // ----------------------------------- fetch the data for a book--------------------------------
 
   return (
     <Box
@@ -300,7 +308,7 @@ const PdfToImages = () => {
           border={"1px solid rgba(0, 0, 0, 0.25)"}
           justifyContent={"center"}
           sx={{
-            borderRadius:"8px",
+            borderRadius: "8px",
             padding: "1rem 1.3rem",
             mt: 2,
           }}
@@ -421,15 +429,13 @@ const PdfToImages = () => {
               }}
               onClick={uploadToFirebase}
             >
-            
-            {isLoading ? (
-          <CircularProgress/>
-        ) : isSuccess ? (
-          "Success!"
-        ) : (
-          "Save Changes"
-        )}
-   
+              {isLoading ? (
+                <CircularProgress />
+              ) : isSuccess ? (
+                "Success!"
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </Stack>
 
@@ -464,26 +470,6 @@ const PdfToImages = () => {
             </Typography>
           )}
         </Box>
-
-        {/* <div style={{ marginTop: 20, textAlign: "center" }}>
-        <Typography variant="h6">Extracted Images:</Typography>
-        {images.length > 0 ? (
-          images.map(({ dataUrl, width, height }, index) => (
-            <div key={index} style={{ marginBottom: 20 }}>
-              <Typography>
-                Page {index + 1}: Width: {width}px, Height: {height}px
-              </Typography>
-              <img
-                src={dataUrl}
-                alt={`Page ${index + 1}`}
-                style={{ width: `${width}px`, height: `${height}px` }}
-              />
-            </div>
-          ))
-        ) : (
-          <p>No images available yet.</p>
-        )}
-      </div> */}
       </Box>
 
       {/* -----------------Preview Section---------------- */}
@@ -493,46 +479,28 @@ const PdfToImages = () => {
           overflow: "auto",
         }}
       >
-        <Stack direction={"row"} justifyContent={"end"} alignItems={"center"}>
-          <Button
-            variant="contained"
-            disabled={!isSuccess}
-            sx={{
-              textTransform: "none",
-              paddingInline: "2rem",
-              borderRadius: "1.6rem",
-              bgcolor: "lightblue",
-              color: "black",
-              mt: 1,
-            }}
-            onClick={() =>
-              navigator.clipboard.writeText(
-                `http://localhost:5173/book/bookId/${uniqueBookId}`
-              )
-            }
-          >
-            Copy URL
-          </Button>
-        </Stack>
+        <Header isSuccess={isSuccess} url={`book/bookId/${uniqueBookId}`} title="Copy URL" />
 
-        <Box
-          sx={{
-            // transform: "scale(0.9)",
-            transformOrigin: "top",
-            width: "100%",
-            height: "100%",
-            overflow: "auto",
-            mb: 3,
-          }}
-        >
-          <FlipbookView
-            isFetchingData={false}
-            images={images}
-            backgroundTemp={backgroundImage}
-            coverColor={coverColor}
-            spineColor={spineColor}
-          />
-        </Box>
+
+          <Box
+            sx={{
+              // transform: "scale(0.9)",
+              transformOrigin: "top",
+              width: "100%",
+              height: "100%",
+              overflow: "auto",
+              mb: 3,
+            }}
+          >
+            <FlipbookView
+              isFetchingData={false}
+              images={images}
+              backgroundTemp={backgroundImage}
+              coverColor={coverColor}
+              spineColor={spineColor}
+            />
+          </Box>
+      
       </Box>
     </Box>
   );

@@ -1,35 +1,39 @@
 import {
   Box,
-  Button,
   Stack,
-  Typography,
   useMediaQuery,
-  useTheme,
+  useTheme
 } from "@mui/material";
+import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import LeftPage from "../components/LeftPage";
 import NavigationsButtons from "../components/NavigationsButtons";
 import RigthPage from "../components/RigthPage";
 import StackedLeft from "../components/StackedLeft";
 import StackedRigth from "../components/StackedRigth";
-import { setSelectedSize } from "../redux/reducers/book";
-import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { setSelectedSize } from "../redux/reducers/book";
 import Loader from "../Shared/Loader";
 
 type Props = {
   isFetchingData?: boolean;
   images?: ImagesType;
-  backgroundTemp:string | null | undefined;
-  coverColor:string;
-  spineColor:string;
+  backgroundTemp?: string | null | undefined;
+  coverColor?: string;
+  spineColor?: string;
 };
 
-const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineColor }: Props) => {
+const FlipbookView = ({
+  isFetchingData,
+  images,
+  backgroundTemp,
+  coverColor,
+  spineColor,
+}: Props) => {
   console.log("isFetchingData:", isFetchingData);
   //--------------------------------------------State------------------------------------
   const { bookid } = useParams();
@@ -41,10 +45,10 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
     (state: { book: BookStateInitState }) => state.book
   );
   const dispatch = useDispatch();
-  const { background } = useSelector(
-    (state: { backgroundReducer: BackgroundInitStateTyoe }) =>
-      state.backgroundReducer
-  );
+  // const { background } = useSelector(
+  //   (state: { backgroundReducer: BackgroundInitStateTyoe }) =>
+  //     state.backgroundReducer
+  // );
   const [isStackedVisible, setIsStackedVisible] = useState(false);
   console.log("totalPages:", totalPages);
 
@@ -52,6 +56,7 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
     useState<BookDataFromFirestoreType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  console.log('error:', error)
   // to check the file is uploaded has the desktop nature and being view in mobile
   const [isDesktopMobileViewd, setIsDesktopMobileViewd] =
     useState<boolean>(false);
@@ -201,7 +206,7 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
       const fetchDocumentById = async () => {
         try {
           // Reference the document using its ID
-          setLoading(true)
+          setLoading(true);
           const docRef = doc(db, "flipbooks", bookid);
 
           // Fetch the document
@@ -214,8 +219,8 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
             const widthOfBook = docSnap.data().widthOfBook;
             handleresize(heigthOfBook, widthOfBook);
 
-            setDocumentData(docSnap.data() as BookDataFromFirestoreType); 
-            setLoading(false)
+            setDocumentData(docSnap.data() as BookDataFromFirestoreType);
+            setLoading(false);
           } else if (isMounted) {
             // No such document
             console.log("No document found with this ID");
@@ -379,7 +384,7 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
     let isMounted = true;
     const fetchDocumentById = async () => {
       try {
-        setLoading(true)
+        setLoading(true);
         // Reference the document using its ID
         const docRef = doc(db, "flipbooks", bookid as string);
 
@@ -394,7 +399,7 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
           handleresize(heigthOfBook, widthOfBook);
 
           setDocumentData(docSnap.data() as BookDataFromFirestoreType); // Update state with document data
-        setLoading(false)
+          setLoading(false);
         } else if (isMounted) {
           // No such document
           console.log("No document found with this ID");
@@ -424,8 +429,7 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
     document.body.style.overflow = isDesktopMobileViewd ? "auto" : "hidden";
   }, [isDesktopMobileViewd]); // Re-run whenever isOverflowHidden changes
 
-  if(isFetchingData && bookid && loading) return <Loader></Loader>
-
+  if (isFetchingData && bookid && loading) return <Loader></Loader>;
 
   return (
     <Box
@@ -441,14 +445,16 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
         overflow: "hidden",
         backgroundImage: isMobileView
           ? "none"
-          : `url(${isFetchingData  && bookid ?  documentData?.background:backgroundTemp})`,
+          : `url(${
+              isFetchingData && bookid
+                ? documentData?.background
+                : backgroundTemp
+            })`,
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
       }}
     >
-      
-
       {/* ------------------------------------------ Wrapper of cover+Book--------------------------------- */}
       <Box
         sx={{
@@ -481,7 +487,7 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
           display={"flex"}
           justifyContent={"center"}
           alignItems={"center"}
-          borderRadius={'8px'}
+          borderRadius={"8px"}
           width={
             isMobileView && width > height
               ? "100vh"
@@ -497,11 +503,31 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
               ? "none"
               : `linear-gradient(
                 90deg,
-                ${isFetchingData && bookid ? documentData?.coverColor:coverColor } 0%,
-                 ${isFetchingData && bookid ? documentData?.coverColor:coverColor } calc(50% - 30px),
-                 ${isFetchingData && bookid ? documentData?.spineColor:spineColor } calc(50% - 30px),
-                ${isFetchingData && bookid ? documentData?.spineColor:spineColor } calc(50% + 30px),
-                ${isFetchingData && bookid ? documentData?.coverColor:coverColor } calc(50% + 30px)
+                ${
+                  isFetchingData && bookid
+                    ? documentData?.coverColor
+                    : coverColor
+                } 0%,
+                 ${
+                   isFetchingData && bookid
+                     ? documentData?.coverColor
+                     : coverColor
+                 } calc(50% - 30px),
+                 ${
+                   isFetchingData && bookid
+                     ? documentData?.spineColor
+                     : spineColor
+                 } calc(50% - 30px),
+                ${
+                  isFetchingData && bookid
+                    ? documentData?.spineColor
+                    : spineColor
+                } calc(50% + 30px),
+                ${
+                  isFetchingData && bookid
+                    ? documentData?.coverColor
+                    : coverColor
+                } calc(50% + 30px)
               )`,
 
             position: "relative",
@@ -590,13 +616,13 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
                 visibility: currentPage < 8 ? "visible" : "hidden",
               }}
             >
-              <StackedRigth />
+              {isFetchingData && bookid && <StackedRigth />}
             </Box>
           )}
         </Stack>
       </Box>
 
-{/* -------------------------------- Navigation container--------------------------- */}
+      {/* -------------------------------- Navigation container--------------------------- */}
       {isMobileView && (
         <Box
           sx={{
@@ -617,11 +643,17 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
             <NavigationsButtons
               currentPage={currentPage}
               flipBookRef={flipBookRef}
-              coverColor = {isFetchingData && bookid?documentData?.coverColor:coverColor}
-              spineColor = {isFetchingData && bookid?documentData?.spineColor:spineColor}
-              totalPage = { isFetchingData && bookid?documentData?.images.length:images?.length}
-
-              
+              coverColor={
+                isFetchingData && bookid ? documentData?.coverColor : coverColor
+              }
+              spineColor={
+                isFetchingData && bookid ? documentData?.spineColor : spineColor
+              }
+              totalPage={
+                isFetchingData && bookid
+                  ? documentData?.images.length
+                  : images?.length
+              }
             />
           }
         </Box>
@@ -630,11 +662,17 @@ const FlipbookView = ({ isFetchingData, images,backgroundTemp,coverColor,spineCo
         <NavigationsButtons
           currentPage={currentPage}
           flipBookRef={flipBookRef}
-          coverColor = { isFetchingData && bookid?documentData?.coverColor:coverColor}
-              spineColor = { isFetchingData && bookid?documentData?.spineColor:spineColor}
-              totalPage = { isFetchingData && bookid?documentData?.images.length:images?.length}
-
-              
+          coverColor={
+            isFetchingData && bookid ? documentData?.coverColor : coverColor
+          }
+          spineColor={
+            isFetchingData && bookid ? documentData?.spineColor : spineColor
+          }
+          totalPage={
+            isFetchingData && bookid
+              ? documentData?.images.length
+              : images?.length
+          }
         />
       )}
     </Box>

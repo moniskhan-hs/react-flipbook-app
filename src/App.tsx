@@ -1,8 +1,9 @@
 import { pdfjs } from "react-pdf";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 // import DemoBook from "./pages/Home";
-import FlipbookView from "./pages/Flipbook";
-import PdfToImagesStatic from "./pages/PageSizeViewer";
+import { lazy } from "react";
+import GridTable from "./pages/GridTable";
+import LoginPage from "./pages/LoginPage";
 // import PdfToImages from "./pages/PageSizeViewer";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -10,7 +11,11 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString();
 
+const FlipbookView = lazy(()=>import('./pages/Flipbook'))
+const PdfToImagesStatic = lazy(()=>import('./pages/PageSizeViewer'))
+
 const App = () => {
+
   return (
     <Router>
       <Routes>
@@ -19,8 +24,10 @@ const App = () => {
           path="/book/bookId/:bookid"
           element={<FlipbookView isFetchingData={true} />}
         />
-        {/* <Route path="/upload" element={<PdfToImages />}/> */}
-        <Route path="/" element={<PdfToImagesStatic />} />
+        <Route path="/upload" element={<PdfToImagesStatic />} />
+        <Route path="/table" element = {<GridTable/>} />
+        <Route path="/" element = {<LoginPage/>} />
+
       </Routes>
     </Router>
   );

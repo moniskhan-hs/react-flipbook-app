@@ -1,0 +1,38 @@
+import { Button, Stack } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+type Props = {
+  url: string;
+  title: string;
+  isSuccess: boolean;
+  isCopy?: boolean;
+};
+
+const Header = ({ isSuccess, title, url, isCopy = true }: Props) => {
+  const navigate = useNavigate();
+  return (
+    <Stack direction={"row"} justifyContent={"end"} alignItems={"center"}>
+      <Button
+        variant="contained"
+        disabled={!isSuccess}
+        sx={{
+          textTransform: "none",
+          paddingInline: "2rem",
+          borderRadius: "1.6rem",
+          bgcolor: "lightblue",
+          color: "black",
+          mt: 1,
+        }}
+        onClick={() =>
+          isCopy
+            ? navigator.clipboard.writeText(`http://localhost:5173/${url}`)
+            : navigate(url)
+        }
+      >
+        {title}
+      </Button>
+    </Stack>
+  );
+};
+
+export default Header;

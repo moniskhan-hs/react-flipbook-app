@@ -1,5 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from "firebase/storage";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -15,7 +16,7 @@ const firebaseFlipBook = {
   authDomain:import.meta.env.VITE_FLIPBOOK_AUTH_DOMAIN ,
   projectId: import.meta.env.VITE_FLIPBOOK_PROJECT_ID,
   storageBucket: import.meta.env.VITE_FLIPBOOK_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FLIPBOOK_MESSAGEING,
+  messagingSenderId: import.meta.env.VITE_FLIPBOOK_MESSAGEING_SEND_ID,
   appId: import.meta.env.VITE_FLIPBOOK_APP_ID
 };
 
@@ -47,5 +48,7 @@ const appFirestore = initializeApp(firebaseFlipBook, "firestoreApp"); // initili
 // Services
 const storage = getStorage(appStorage);
 const db = getFirestore(appFirestore);
+const auth = getAuth(appFirestore)
 
-export { db, storage };
+export { auth, db, storage };
+
