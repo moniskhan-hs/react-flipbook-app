@@ -1,9 +1,4 @@
-import {
-  Box,
-  Stack,
-  useMediaQuery,
-  useTheme
-} from "@mui/material";
+import { Box, Stack, useMediaQuery, useTheme } from "@mui/material";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
@@ -45,10 +40,7 @@ const FlipbookView = ({
     (state: { book: BookStateInitState }) => state.book
   );
   const dispatch = useDispatch();
-  // const { background } = useSelector(
-  //   (state: { backgroundReducer: BackgroundInitStateTyoe }) =>
-  //     state.backgroundReducer
-  // );
+
   const [isStackedVisible, setIsStackedVisible] = useState(false);
   console.log("totalPages:", totalPages);
 
@@ -56,7 +48,7 @@ const FlipbookView = ({
     useState<BookDataFromFirestoreType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  console.log('error:', error)
+  console.log("error:", error);
   // to check the file is uploaded has the desktop nature and being view in mobile
   const [isDesktopMobileViewd, setIsDesktopMobileViewd] =
     useState<boolean>(false);
@@ -72,6 +64,10 @@ const FlipbookView = ({
   const isMobileView = useMediaQuery(theme.breakpoints.down("sm"));
   // Adjust breakpoint as needed
   console.log("isMobileView:", isMobileView);
+
+  // --------------------------------------------Sound Logic--------------------------------
+
+  const flipSoundRef = useRef<HTMLAudioElement | null>(null);
 
   // -------------------------------------- PDF Logic-----------------------------
 
@@ -104,8 +100,18 @@ const FlipbookView = ({
     data: string;
     object: { pages: { currentPageIndex: number } };
   }) => {
+    console.log("event:", event);
+    if (flipSoundRef.current) {
+      if (event.data == "flipping") {
+        flipSoundRef.current.play();
+        console.log("sound played");
+      }
+    }
+
     conditionRef.current = event.data;
     setCurrentPage(event.object.pages.currentPageIndex);
+
+    // --------------- need to stop the sound when page is not fully flip
   };
 
   // UseLayoutEffect to manage StackedRigth visibility
@@ -429,11 +435,8 @@ const FlipbookView = ({
     document.body.style.overflow = isDesktopMobileViewd ? "auto" : "hidden";
   }, [isDesktopMobileViewd]); // Re-run whenever isOverflowHidden changes
 
-
   // --------------- showing the loader----------------------------
   if (isFetchingData && bookid && loading) return <Loader></Loader>;
-
-
 
   return (
     <Box
@@ -561,7 +564,7 @@ const FlipbookView = ({
             ref={flipBookRef}
             onChangeState={onChnageStateOfpage}
             startPage={isMobileView ? 0 : 1}
-            flippingTime={isMobileView ? 1500 : 1000}
+            flippingTime={isMobileView ? 1500 : 1100}
             // swipeDistance={isMobileView?60:30}
             startZIndex={isMobileView ? 10 : 0}
           >
@@ -679,6 +682,12 @@ const FlipbookView = ({
           }
         />
       )}
+
+      <audio
+        ref={flipSoundRef}
+        src="/page-flip-sound(2).mp3"
+        preload="audio"
+      ></audio>
     </Box>
   );
 };

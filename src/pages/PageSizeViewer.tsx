@@ -8,7 +8,7 @@ import {
 import { addDoc, collection } from "firebase/firestore";
 import { useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
-import { Document, Page, pdfjs } from "react-pdf";
+import { Document, Page} from "react-pdf";
 import { useDispatch } from "react-redux";
 import UploadBg from "../components/UploadBg";
 import { db } from "../firebase";
@@ -20,8 +20,6 @@ import {
   uploadImageOnFirebase
 } from "../utils/upload/fire-base-storage";
 import FlipbookView from "./Flipbook";
-// Set the worker for PDF.js
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const PdfToImages = () => {
   const [numPages, setNumPages] = useState<number>(0);
