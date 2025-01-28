@@ -8,17 +8,19 @@ import {
 import { addDoc, collection } from "firebase/firestore";
 import { useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
-import { Document, Page} from "react-pdf";
+import toast from "react-hot-toast";
+import { Document, Page } from "react-pdf";
 import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import UploadBg from "../components/UploadBg";
 import { db } from "../firebase";
 import { setSelectedSize } from "../redux/reducers/book";
 import { setbackground } from "../redux/reducers/setBackground";
 import Header from "../Shared/Header";
-import { adjustColorBrightness } from "../utils/features";
-import {
-  uploadImageOnFirebase
-} from "../utils/upload/fire-base-storage";
+import { adjustColorBrightness, inputFields } from "../utils/features";
+import { convertFileToDataURL } from "../utils/upload/convertFiletoBase64";
+import { uploadImageOnFirebase } from "../utils/upload/fire-base-storage";
+import { uploadAudioOnFirebase } from "../utils/upload/uploadAudio";
 import FlipbookView from "./Flipbook";
 
 const PdfToImages = () => {
@@ -30,7 +32,6 @@ const PdfToImages = () => {
   const [coverColor, setCoverColor] = useState("#aabbcc");
   const dispatch = useDispatch();
   const processedPages = useRef<Set<number>>(new Set());
-  // const navigate = useNavigate();
   const [isCoverColorPickerVisible, setIsCoverColorPickerVisible] =
     useState(true);
   const [backgroundImage, setBackgroundImage] = useState<string | null>();
@@ -39,6 +40,8 @@ const PdfToImages = () => {
   const [uniqueBookId, seetUniqueBookId] = useState<string>();
   const [heigthOfBook, setHeigthOfBook] = useState<number>();
   const [widthOfBook, setWidthOfBook] = useState<number>();
+  const [audioFile, setAudioFile] = useState<string | null>();
+  const [logo,setLogo] = useState<string | null>()
   //---------------------- Globals variables ----------------------
 
   //----------------------- A L L   M E T H O D S   OR   H A N D L E R S -----------------------
@@ -57,12 +60,24 @@ const PdfToImages = () => {
   };
   // ---------------------------------- method to upload the PDF--------------
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    type: string
+  ) => {
     const uploadedFile = event.target.files?.[0];
     if (uploadedFile && uploadedFile.type === "application/pdf") {
       setFile(uploadedFile);
+    } else if (type === "audio/*") {
+      console.log("audio selected");
+      const audioURL = await convertFileToDataURL(uploadedFile!);
+      setAudioFile(audioURL);
+    } else if (type === "image/*"){
+      const logoURL = await convertFileToDataURL(uploadedFile!);
+      setLogo(logoURL)
+      console.log("image logo selected");
+
     } else {
-      alert("Please upload a valid PDF file.");
+      toast.error("Please upload a valid PDF file.");
     }
   };
 
@@ -219,60 +234,72 @@ const PdfToImages = () => {
     }
   };
   // ---------------------------------- method to upload the images and  background image on firestore---------------
-
   const uploadToFirebase = async () => {
-    //steps
-    // 1. post the images on firestorage
-    // 2.and then post on cloud storage with downloadbale URL and
     const bookName = file && file.name;
     setIsLoading(true);
     setIsSuccess(false);
+
     if (file) {
-      // Use Promise.all with map to wait for all uploads to finish
-      const uploadedImages: string[] = await Promise.all(
-        images.map(async (ele) => {
-          try {
-            const downloadLink = await uploadImageOnFirebase(
-              ele.dataUrl,
-              bookName as string
-            );
-            return downloadLink; // Return the download link for Promise.all to resolve
-          } catch (err) {
-            console.log("err", err);
-            return ""; // Handle errors gracefully (optional: filter later)
-          }
-        })
-      );
+      try {
+        // Use Promise.all to upload all images, background image, and audio concurrently
+        const [uploadedImages, backgroundImageURl, backgroundAudio,logoURL] =
+          await Promise.all([
+            // Upload images
+            Promise.all(
+              images.map(async (ele) => {
+                try {
+                  const downloadLink = await uploadImageOnFirebase(
+                    ele.dataUrl,
+                    bookName as string
+                  );
+                  return downloadLink;
+                } catch (err) {
+                  console.log("Error uploading image:", err);
+                  return ""; // Handle errors gracefully
+                }
+              })
+            ),
+            // Upload background image (if present)
+            backgroundImage
+              ? uploadImageOnFirebase(backgroundImage, bookName as string)
+              : Promise.resolve(""),
+            // Upload audio file (if present)
+            audioFile
+              ? uploadAudioOnFirebase(audioFile, bookName as string)
+              : Promise.resolve(""),
 
-      let backgroundImageURl;
 
-      if (backgroundImage) {
-        backgroundImageURl = await uploadImageOnFirebase(
-          backgroundImage,
-          bookName as string
-        );
+              logo?uploadImageOnFirebase(logo,bookName as string) : Promise.resolve('')
+          ]);
+
+        // Post the data to Firestore
+        const docRef = await addDoc(collection(db, "flipbooks"), {
+          name: bookName,
+          images: uploadedImages,
+          background: backgroundImageURl,
+          heigthOfBook,
+          widthOfBook,
+          coverColor,
+          spineColor,
+          backgroundAudio,
+          logo:logoURL
+        });
+
+        // Set unique book ID for sharing
+        seetUniqueBookId(docRef.id as string);
+
+        console.log("Data successfully added to Firestore");
+        setIsSuccess(true);
+      } catch (error) {
+        console.error("Error during upload:", error);
+        toast.error("Failed to upload data");
+      } finally {
+        setIsLoading(false);
       }
-
-      // Post the data to Firestore
-      const docRef = await addDoc(collection(db, "flipbooks"), {
-        name: bookName, // book Name
-        images: uploadedImages, // All uploaded images
-        background: backgroundImageURl || "", // Background image
-        heigthOfBook,
-        widthOfBook,
-        coverColor,
-        spineColor,
-      });
-
-      //  res.id = unique book id ==> wil be saved in URL to get the sharable link
-      seetUniqueBookId(docRef.id as string);
-
-      console.log("Data successfully added to Firestore");
-      setIsSuccess(true);
-      setIsLoading(false);
     } else {
       console.error("No file provided!");
       setIsSuccess(false);
+      toast.error("No file is selected");
     }
   };
 
@@ -287,6 +314,7 @@ const PdfToImages = () => {
       sx={{
         width: "100vw",
         display: "flex",
+        overflow:'auto',
         padding: "0rem 2rem ",
       }}
     >
@@ -294,11 +322,13 @@ const PdfToImages = () => {
       <Box
         sx={{
           width: "20%",
-          overflow: "auto",
-          // padding={'1rem 0.5rem'}
+          height:"100vh",
+          overflowY: "auto",
         }}
       >
         <Stack
+        height={'auto'}
+        overflow = 'auto'
           // direction={"row"}
           display={"flex"}
           alignItems={"center"}
@@ -312,52 +342,59 @@ const PdfToImages = () => {
           }}
         >
           <Stack direction={"column"} gap={2} alignItems={"start"} sx={{}}>
-            <Typography
-              sx={{
-                fontWeight: "bold",
-                fontSize: "1rem",
-              }}
-            >
-              Upload the PDF{" "}
-            </Typography>
-            {/* ------------------Upload pdf file------------------ */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                padding: "10px 20px",
-                backgroundColor: "#f5f5f5",
-                borderRadius: "8px",
-                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              <Button
-                variant="contained"
-                component="label"
-                startIcon={<i className="fas fa-upload"></i>}
-                sx={{
-                  textTransform: "none",
-                  backgroundColor: "#e8f0fe",
-                  color: "#1976d2",
-                  fontWeight: "bold",
-                  borderRadius: "4px",
-                  ":hover": { backgroundColor: "#d7e6fd" },
-                }}
-              >
-                Upload File
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handleFileUpload}
-                  hidden
-                />
-              </Button>
-              <span>No file chosen</span>
-            </Box>
+            {inputFields.map((ele) => {
+              return (
+                <Stack direction="column" key={ele.id} spacing={2}>
+                  <Typography
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                    }}
+                  >
+                    {ele.heading}
+                  </Typography>
+                  {/* ------------------Upload pdf file------------------ */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 2,
+                      backgroundColor: "#f5f5f5",
+                      borderRadius: "8px",
+                      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      component="label"
+                      startIcon={<i className="fas fa-upload"></i>}
+                      sx={{
+                        textTransform: "none",
+                        backgroundColor: "#e8f0fe",
+                        color: "#1976d2",
+                        fontWeight: "bold",
+                        borderRadius: "4px",
+                        ":hover": { backgroundColor: "#d7e6fd" },
+                      }}
+                    >
+                      {ele.title}
+                      <input
+                        type={ele.type}
+                        accept={ele.accept}
+                        onChange={(e) => handleFileUpload(e, ele.accept)}
+                        hidden
+                        required
+                      />
+                    </Button>
+                    <span>{ele.subTitle}</span>
+                  </Box>
+                </Stack>
+              );
+            })}
 
             {/* --------------------- upload the backround image ------------------------------- */}
             <UploadBg onBackgroundChange={hanldeBackgroundChange} />
+
             <Typography
               sx={{
                 fontWeight: "bold",
@@ -422,7 +459,7 @@ const PdfToImages = () => {
                 textTransform: "none",
                 paddingInline: "2rem",
                 borderRadius: "1.6rem",
-                my: 2,
+                mt: 2,
                 mx: "auto",
               }}
               onClick={uploadToFirebase}
@@ -430,14 +467,22 @@ const PdfToImages = () => {
               {isLoading ? (
                 <CircularProgress />
               ) : isSuccess ? (
-                "Success!"
+                "Saved!"
               ) : (
                 "Save Changes"
               )}
             </Button>
+            <Link to="/table" style={{
+              marginInline:'auto'
+            }}>
+              <Button variant="text" sx={{
+                textTransform: "none",
+
+              }}>Go to table</Button>
+            </Link>
+         
           </Stack>
 
-          {/* -------------------set background image----------------- */}
         </Stack>
 
         {/* ---------------------- render the pdf pages [display none ] */}
@@ -477,28 +522,32 @@ const PdfToImages = () => {
           overflow: "auto",
         }}
       >
-        <Header isSuccess={isSuccess} url={`book/bookId/${uniqueBookId}`} title="Copy URL" />
+        <Header
+          isSuccess={isSuccess}
+          url={`book/bookId/${uniqueBookId}`}
+          title="Copy URL"
+        />
 
-
-          <Box
-            sx={{
-              // transform: "scale(0.9)",
-              transformOrigin: "top",
-              width: "100%",
-              height: "100%",
-              overflow: "auto",
-              mb: 3,
-            }}
-          >
-            <FlipbookView
-              isFetchingData={false}
-              images={images}
-              backgroundTemp={backgroundImage}
-              coverColor={coverColor}
-              spineColor={spineColor}
-            />
-          </Box>
-      
+        <Box
+          sx={{
+            // transform: "scale(0.9)",
+            transformOrigin: "top",
+            width: "100%",
+            height: "100%",
+            overflow: "auto",
+            mb: 3,
+          }}
+        >
+          <FlipbookView
+            isFetchingData={false}
+            images={images}
+            backgroundTemp={backgroundImage}
+            coverColor={coverColor}
+            spineColor={spineColor}
+            logoTemp={logo}
+            audioFile = {audioFile ? audioFile:''}
+          />
+        </Box>
       </Box>
     </Box>
   );

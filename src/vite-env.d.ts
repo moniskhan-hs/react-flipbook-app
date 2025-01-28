@@ -39,6 +39,8 @@ type BookDataFromFirestoreType = {
   widthOfBook: number,
   coverColor: string;
   spineColor: string;
+  backgroundAudio:string;
+  logo:string;
 }
 
 type ImagesType = {

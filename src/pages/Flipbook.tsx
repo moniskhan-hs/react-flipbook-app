@@ -1,4 +1,5 @@
-import { Box, Stack, useMediaQuery, useTheme } from "@mui/material";
+import { VolumeOff, VolumeUp } from "@mui/icons-material";
+import { Box, IconButton, Stack, useMediaQuery, useTheme } from "@mui/material";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
@@ -20,6 +21,8 @@ type Props = {
   backgroundTemp?: string | null | undefined;
   coverColor?: string;
   spineColor?: string;
+  logoTemp?: string | null | undefined;
+  audioFile?:string |  undefined;
 };
 
 const FlipbookView = ({
@@ -28,6 +31,8 @@ const FlipbookView = ({
   backgroundTemp,
   coverColor,
   spineColor,
+  logoTemp,
+  audioFile
 }: Props) => {
   console.log("isFetchingData:", isFetchingData);
   //--------------------------------------------State------------------------------------
@@ -52,6 +57,7 @@ const FlipbookView = ({
   // to check the file is uploaded has the desktop nature and being view in mobile
   const [isDesktopMobileViewd, setIsDesktopMobileViewd] =
     useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   //------------------------------------------- Global variable [entire file]----------------------------
 
@@ -68,6 +74,15 @@ const FlipbookView = ({
   // --------------------------------------------Sound Logic--------------------------------
 
   const flipSoundRef = useRef<HTMLAudioElement | null>(null);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleToggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !audioRef.current.muted;
+      setIsMuted(audioRef.current.muted);
+    }
+  };
 
   // -------------------------------------- PDF Logic-----------------------------
 
@@ -436,7 +451,8 @@ const FlipbookView = ({
   }, [isDesktopMobileViewd]); // Re-run whenever isOverflowHidden changes
 
   // --------------- showing the loader----------------------------
-  if (isFetchingData && bookid && loading) return <Loader></Loader>;
+
+  if (loading && isFetchingData && bookid) return <Loader></Loader>;
 
   return (
     <Box
@@ -462,6 +478,8 @@ const FlipbookView = ({
         backgroundPosition: "center",
       }}
     >
+      {/* ----------------------------------------------- LOGO-------------------------------------------- */}
+
       {/* ------------------------------------------ Wrapper of cover+Book--------------------------------- */}
       <Box
         sx={{
@@ -485,6 +503,7 @@ const FlipbookView = ({
                 width: "100%",
                 height: "100%",
                 overflow: "hidden",
+                position: "relative",
               }),
         }}
       >
@@ -509,33 +528,27 @@ const FlipbookView = ({
             background: isMobileView
               ? "none"
               : `linear-gradient(
-                90deg,
-                ${
-                  isFetchingData && bookid
-                    ? documentData?.coverColor
-                    : coverColor
-                } 0%,
-                 ${
-                   isFetchingData && bookid
-                     ? documentData?.coverColor
-                     : coverColor
-                 } calc(50% - 30px),
-                 ${
-                   isFetchingData && bookid
-                     ? documentData?.spineColor
-                     : spineColor
-                 } calc(50% - 30px),
-                ${
-                  isFetchingData && bookid
-                    ? documentData?.spineColor
-                    : spineColor
-                } calc(50% + 30px),
-                ${
-                  isFetchingData && bookid
-                    ? documentData?.coverColor
-                    : coverColor
-                } calc(50% + 30px)
-              )`,
+              90deg,
+              ${
+                isFetchingData && bookid ? documentData?.coverColor : coverColor
+              } 0%,
+               ${
+                 isFetchingData && bookid
+                   ? documentData?.coverColor
+                   : coverColor
+               } calc(50% - 30px),
+               ${
+                 isFetchingData && bookid
+                   ? documentData?.spineColor
+                   : spineColor
+               } calc(50% - 30px),
+              ${
+                isFetchingData && bookid ? documentData?.spineColor : spineColor
+              } calc(50% + 30px),
+              ${
+                isFetchingData && bookid ? documentData?.coverColor : coverColor
+              } calc(50% + 30px)
+            )`,
 
             position: "relative",
             overflow: "hidden",
@@ -627,6 +640,71 @@ const FlipbookView = ({
             </Box>
           )}
         </Stack>
+
+        {!isMobileView && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: "1%",
+              left: "4%",
+              width: "10rem",
+              height: "4rem",
+              backgroundImage: `url(${
+                isFetchingData && bookid ? documentData?.logo : logoTemp
+              })`,
+              backgroundSize: "cover",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+            }}
+          ></Box>
+        )}
+
+
+<div
+        style={{
+          position: "absolute",
+          bottom: "5%",
+          left: "4%",
+        }}
+      >
+        {/* Hidden audio element */}
+        <audio
+          ref={audioRef}
+          src={
+            isFetchingData && bookid ? documentData?.backgroundAudio :audioFile
+          }
+          autoPlay
+          loop
+          preload="auto"
+        ></audio>
+
+        {/* Speaker icon to control mute/unmute */}
+        <IconButton
+        sx={{
+          borderRadius:"50%",
+          bgcolor:isFetchingData && bookid ? documentData?.coverColor:spineColor
+        }}
+          onClick={handleToggleMute}
+
+          aria-label={isMuted ? "Unmute Audio" : "Mute Audio"}
+        >
+          {isMuted ? (
+            <VolumeOff
+              sx={{
+                color: "red",
+              }}
+            />
+          ) : (
+            <VolumeUp
+              sx={{
+                color:
+                  isFetchingData && bookid ? documentData?.coverColor : "green",
+              }}
+            />
+          )}
+        </IconButton>
+      </div>
+
       </Box>
 
       {/* -------------------------------- Navigation container--------------------------- */}
@@ -666,28 +744,33 @@ const FlipbookView = ({
         </Box>
       )}
       {!isMobileView && (
-        <NavigationsButtons
-          currentPage={currentPage}
-          flipBookRef={flipBookRef}
-          coverColor={
-            isFetchingData && bookid ? documentData?.coverColor : coverColor
-          }
-          spineColor={
-            isFetchingData && bookid ? documentData?.spineColor : spineColor
-          }
-          totalPage={
-            isFetchingData && bookid
-              ? documentData?.images.length
-              : images?.length
-          }
-        />
+        <>
+          <NavigationsButtons
+            currentPage={currentPage}
+            flipBookRef={flipBookRef}
+            coverColor={
+              isFetchingData && bookid ? documentData?.coverColor : coverColor
+            }
+            spineColor={
+              isFetchingData && bookid ? documentData?.spineColor : spineColor
+            }
+            totalPage={
+              isFetchingData && bookid
+                ? documentData?.images.length
+                : images?.length
+            }
+          />
+        </>
       )}
 
+      {/* -------------------------------------------Audios------------------------------------------ */}
       <audio
         ref={flipSoundRef}
         src="/page-flip-sound(2).mp3"
         preload="audio"
       ></audio>
+
+     
     </Box>
   );
 };

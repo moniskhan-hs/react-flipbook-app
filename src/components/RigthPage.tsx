@@ -15,10 +15,13 @@ const RigthPage = React.forwardRef<
     (state: { book: BookStateInitState }) => state.book
   );
 
+
   return (
     <div style={{ display: "flex", flexDirection: "row" }} ref={ref}>
       {/* Right Content Box */}
-      <Box
+
+
+       <Box
         sx={{
           height: height,
           width: width,
@@ -41,8 +44,12 @@ const RigthPage = React.forwardRef<
         }}
       >
      
-      </Box>
 
+      </Box>
+ 
+
+
+    
       {/* Right Fluted Panel */}
     </div>
   );

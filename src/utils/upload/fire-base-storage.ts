@@ -15,9 +15,6 @@ export const uploadImageOnFirebase = async (base64Image:string, bookName:string)
    
     //-------------    Convert Base64 to binary data
     const blob = base64ToBlob(base64Data, "image/png");
-  
-
-
 
      // Convert Blob to File
     const file = new File([blob], fileName, { type: "image/png" });

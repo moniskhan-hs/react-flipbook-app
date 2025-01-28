@@ -1,10 +1,12 @@
 import { pdfjs } from "react-pdf";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 // import DemoBook from "./pages/Home";
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
+import { Toaster } from "react-hot-toast";
 import GridTable from "./pages/GridTable";
 import LoginPage from "./pages/LoginPage";
-import PdfToImages from "./pages/PageSizeViewer";
+import Loader from "./Shared/Loader";
+// import PdfToImages from "./pages/PageSizeViewer";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
@@ -12,12 +14,13 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 const FlipbookView = lazy(()=>import('./pages/Flipbook'))
-// const PdfToImagesStatic = lazy(()=>import('./pages/PageSizeViewer'))
+const PdfToImages = lazy(()=>import('./pages/PageSizeViewer'))
 
 const App = () => {
 
   return (
     <Router>
+      <Suspense fallback={<Loader></Loader>}>
       <Routes>
         {/* <Route path="/" element={<Home/>}/> */}
         <Route
@@ -29,6 +32,9 @@ const App = () => {
         <Route path="/" element = {<LoginPage/>} />
 
       </Routes>
+      </Suspense>
+      <Toaster position="top-center"/>
+
     </Router>
   );
 };

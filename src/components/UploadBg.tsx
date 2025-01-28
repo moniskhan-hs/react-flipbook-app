@@ -38,10 +38,10 @@ const UploadBg = ({ onBackgroundChange }: Props) => {
           display: "flex",
           alignItems: "center",
           gap: 2,
-          padding: "10px 20px",
           backgroundColor: "#f5f5f5",
           borderRadius: "8px",
           boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+          paddingInline:"0.5rem"
         }}
       >
         <Button
@@ -57,7 +57,7 @@ const UploadBg = ({ onBackgroundChange }: Props) => {
             ":hover": { backgroundColor: "#d7e6fd" },
           }}
         >
-          Upload Image
+          Image
           <input
             type="file"
             // accept="application/pdf"
@@ -65,7 +65,7 @@ const UploadBg = ({ onBackgroundChange }: Props) => {
             hidden
           />
         </Button>
-        <span>No file chosen</span>
+        <span>No image chosen</span>
       </Box>
     </Stack>
   );
