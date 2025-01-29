@@ -43,3 +43,19 @@ a{
   scrollbar-width: thin; /* Makes scrollbar thinner */
   scrollbar-color: #888 #f1f1f1; /* Thumb color | Track color */
 }
+
+/* ---------------------- Book Page Loader---------------------------------------- */
+
+@keyframes pageTurn {
+  0% {
+    transform: rotateY(0deg);
+    background: rgb(145, 144, 144);
+  }
+  50% {
+    transform: rotateY(-90deg);
+  }
+  100% {
+    transform: rotateY(-180deg);
+    background: rgb(145, 144, 144);
+  }
+}

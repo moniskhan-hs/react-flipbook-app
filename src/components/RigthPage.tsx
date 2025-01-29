@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import PageLoader from "./PageLoader";
 
 const RigthPage = React.forwardRef<
   HTMLDivElement,
@@ -15,13 +16,19 @@ const RigthPage = React.forwardRef<
     (state: { book: BookStateInitState }) => state.book
   );
 
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = props.url!;
+    img.onload = () => setLoaded(true);
+  }, [props.url]);
 
   return (
     <div style={{ display: "flex", flexDirection: "row" }} ref={ref}>
       {/* Right Content Box */}
 
-
-       <Box
+      <Box
         sx={{
           height: height,
           width: width,
@@ -31,8 +38,9 @@ const RigthPage = React.forwardRef<
             ? "none"
             : "18% 18% 18% 18% / 2% 0% 0% 2%",
           zIndex: 10,
-          // backgroundImage: `url(${props.number}.png)`, / static 
-          backgroundImage: `url(${props.url})`,
+          // backgroundImage: `url(${props.number}.png)`, / static
+
+          backgroundImage: loaded ? `url(${props.url})` : "none",
           backgroundPosition: "center",
           backgroundSize: "100% 100%",
           backgroundRepeat: "no-repeat",
@@ -43,13 +51,24 @@ const RigthPage = React.forwardRef<
           overflow: "hidden",
         }}
       >
-     
-
+        {!loaded && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <PageLoader />
+          </Box>
+        )}
       </Box>
- 
 
-
-    
       {/* Right Fluted Panel */}
     </div>
   );

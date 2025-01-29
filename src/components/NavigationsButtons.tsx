@@ -23,6 +23,7 @@ const NavigationsButtons = ({
       alignItems={"center"}
       mt={1}
     >
+      {/* -------------------------prev  button ------------------------ */}
       <Button
         variant="contained"
         disabled={currentPage == 0}
@@ -43,6 +44,7 @@ const NavigationsButtons = ({
         {" "}
         Prev
       </Button>
+      {/* -------------------------- pages number-------------------- */}
       <Box
         mx={2}
         sx={{
@@ -51,8 +53,9 @@ const NavigationsButtons = ({
           fontSize: "1.3rem",
         }}
       >
-        {currentPage + 2} / {totalPage}
+        {  currentPage + 2 <=totalPage! ?currentPage + 2:currentPage+1} / {totalPage}
       </Box>
+      {/* -------------------------------- next button -------------------------*/}
       <Button
         variant="contained"
         disabled={currentPage + 2 >= totalPage!}

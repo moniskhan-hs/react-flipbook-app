@@ -1,5 +1,5 @@
 import { VolumeOff, VolumeUp } from "@mui/icons-material";
-import { Box, IconButton, Stack, useMediaQuery, useTheme } from "@mui/material";
+import { Box, IconButton, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
@@ -8,12 +8,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import LeftPage from "../components/LeftPage";
 import NavigationsButtons from "../components/NavigationsButtons";
+import PageLoader from "../components/PageLoader";
 import RigthPage from "../components/RigthPage";
 import StackedLeft from "../components/StackedLeft";
 import StackedRigth from "../components/StackedRigth";
 import { db } from "../firebase";
 import { setSelectedSize } from "../redux/reducers/book";
-import Loader from "../Shared/Loader";
 
 type Props = {
   isFetchingData?: boolean;
@@ -22,7 +22,7 @@ type Props = {
   coverColor?: string;
   spineColor?: string;
   logoTemp?: string | null | undefined;
-  audioFile?:string |  undefined;
+  audioFile?: string | undefined;
 };
 
 const FlipbookView = ({
@@ -32,7 +32,7 @@ const FlipbookView = ({
   coverColor,
   spineColor,
   logoTemp,
-  audioFile
+  audioFile,
 }: Props) => {
   console.log("isFetchingData:", isFetchingData);
   //--------------------------------------------State------------------------------------
@@ -57,7 +57,7 @@ const FlipbookView = ({
   // to check the file is uploaded has the desktop nature and being view in mobile
   const [isDesktopMobileViewd, setIsDesktopMobileViewd] =
     useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   //------------------------------------------- Global variable [entire file]----------------------------
 
@@ -82,6 +82,7 @@ const FlipbookView = ({
       audioRef.current.muted = !audioRef.current.muted;
       setIsMuted(audioRef.current.muted);
     }
+    // setIsMuted(pre=>!pre)
   };
 
   // -------------------------------------- PDF Logic-----------------------------
@@ -122,11 +123,7 @@ const FlipbookView = ({
         console.log("sound played");
       }
     }
-
     conditionRef.current = event.data;
-    setCurrentPage(event.object.pages.currentPageIndex);
-
-    // --------------- need to stop the sound when page is not fully flip
   };
 
   // UseLayoutEffect to manage StackedRigth visibility
@@ -446,13 +443,15 @@ const FlipbookView = ({
   }, [isMobileView]);
 
   useEffect(() => {
-    // Dynamically update the body overflow
     document.body.style.overflow = isDesktopMobileViewd ? "auto" : "hidden";
   }, [isDesktopMobileViewd]); // Re-run whenever isOverflowHidden changes
 
   // --------------- showing the loader----------------------------
 
-  if (loading && isFetchingData && bookid) return <Loader></Loader>;
+  console.log("currentPage:", currentPage);
+  console.log("total pages:", totalPages);
+
+  if (loading && isFetchingData && bookid) return <PageLoader></PageLoader>;
 
   return (
     <Box
@@ -478,8 +477,6 @@ const FlipbookView = ({
         backgroundPosition: "center",
       }}
     >
-      {/* ----------------------------------------------- LOGO-------------------------------------------- */}
-
       {/* ------------------------------------------ Wrapper of cover+Book--------------------------------- */}
       <Box
         sx={{
@@ -636,7 +633,20 @@ const FlipbookView = ({
                 visibility: currentPage < 8 ? "visible" : "hidden",
               }}
             >
-              {isFetchingData && bookid && <StackedRigth />}
+              {
+                //  posted
+                isFetchingData && bookid ? (
+                  documentData &&
+                  documentData.images.length % 2 == 1 &&
+                  currentPage == documentData.images.length - 1 ? (
+                    ""
+                  ) : (
+                    <StackedRigth></StackedRigth>
+                  )
+                ) : // unposted
+              
+               ( images && images.length >0 && ( images.length % 2 == 1 && currentPage == images.length - 1 ? ("") : (<StackedRigth />  )))
+              }
             </Box>
           )}
         </Stack>
@@ -656,55 +666,71 @@ const FlipbookView = ({
               backgroundRepeat: "no-repeat",
               backgroundPosition: "center",
             }}
-          ></Box>
+          >
+{!isFetchingData &&  logoTemp==null && <Typography 
+
+sx={{
+  fontWeight:"bold",
+  fontStyle:'italic',
+  fontSize:"1.5rem"
+}}
+>Your Logo</Typography>}
+
+          </Box>
         )}
 
-
-<div
-        style={{
-          position: "absolute",
-          bottom: "5%",
-          left: "4%",
-        }}
-      >
-        {/* Hidden audio element */}
-        <audio
-          ref={audioRef}
-          src={
-            isFetchingData && bookid ? documentData?.backgroundAudio :audioFile
-          }
-          autoPlay
-          loop
-          preload="auto"
-        ></audio>
-
-        {/* Speaker icon to control mute/unmute */}
-        <IconButton
-        sx={{
-          borderRadius:"50%",
-          bgcolor:isFetchingData && bookid ? documentData?.coverColor:spineColor
-        }}
-          onClick={handleToggleMute}
-
-          aria-label={isMuted ? "Unmute Audio" : "Mute Audio"}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "5%",
+            left: "4%",
+          }}
         >
-          {isMuted ? (
-            <VolumeOff
-              sx={{
-                color: "red",
-              }}
-            />
-          ) : (
-            <VolumeUp
-              sx={{
-                color:
-                  isFetchingData && bookid ? documentData?.coverColor : "green",
-              }}
-            />
-          )}
-        </IconButton>
-      </div>
+          {/* Hidden audio element */}
+          <audio
+            ref={audioRef}
+            src={
+              isFetchingData && bookid
+                ? documentData?.backgroundAudio
+                : audioFile
+            }
+            // autoPlay
+            loop
+            preload="auto"
+          ></audio>
 
+          {/* Speaker icon to control mute/unmute */}
+          <IconButton
+            sx={{
+              borderRadius: "50%",
+              border: `1px solid ${
+                isFetchingData && bookid ? documentData?.coverColor : coverColor
+              }`,
+            }}
+            onClick={handleToggleMute}
+            aria-label={isMuted ? "Unmute Audio" : "Mute Audio"}
+          >
+            {isMuted ? (
+              <VolumeOff
+                sx={{
+                  color:
+                    isFetchingData && bookid
+                      ? documentData?.spineColor
+                      : spineColor,
+                }}
+              />
+            ) : (
+              <VolumeUp
+                sx={{
+                  color:
+                    isFetchingData && bookid
+                      ? documentData?.coverColor
+                      : coverColor,
+                }}
+              />
+            )}
+          </IconButton>
+        </div>
       </Box>
 
       {/* -------------------------------- Navigation container--------------------------- */}
@@ -763,14 +789,12 @@ const FlipbookView = ({
         </>
       )}
 
-      {/* -------------------------------------------Audios------------------------------------------ */}
+      {/* -------------------------------------------Flip page Audios------------------------------------------ */}
       <audio
         ref={flipSoundRef}
         src="/page-flip-sound(2).mp3"
         preload="audio"
       ></audio>
-
-     
     </Box>
   );
 };
