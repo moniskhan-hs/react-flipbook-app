@@ -33,8 +33,9 @@ export function adjustColorBrightness(color: string, percentage: number): string
 
 export const inputFields = [
 
-  { id: 1, heading:" Upload the PDF", title: 'PDF', subTitle: 'No file chosen', accept: 'application/pdf', type: 'file', },
-  { id: 2, heading:"Add Background music", title: 'audio', subTitle: 'No audio chosen', accept: 'audio/*', type: 'file', },
-  { id:3,heading:'Upload the logo',title:'logo',subTitle:'No file chosen',accept:'image/*', type:'file'}
-
+  { id: 1, heading: " Upload the PDF", title: 'PDF', subTitle: 'No file chosen', accept: 'application/pdf', type: 'file', },
+  { id: 2, heading: "Upload Background music", title: 'audio', subTitle: 'No audio chosen', accept: 'audio/*', type: 'file', },
+  { id: 3, heading: 'Upload the logo', title: 'logo', subTitle: 'No file chosen', accept: 'image/*', type: 'file' },
+  { id: 4, heading: 'Upload background Image', title: 'Image', subTitle: 'No file chosen', accept: 'image/*', type: 'file' }
+  
 ]

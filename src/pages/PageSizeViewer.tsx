@@ -3,19 +3,17 @@ import {
   Button,
   CircularProgress,
   Stack,
-  Typography
+  Typography,
 } from "@mui/material";
 import { addDoc, collection } from "firebase/firestore";
 import { useRef, useState } from "react";
-import { HexColorPicker } from "react-colorful";
 import toast from "react-hot-toast";
 import { Document, Page } from "react-pdf";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import UploadBg from "../components/UploadBg";
+import ColorPicker from "../components/uploadPage/ColorPicker";
 import { db } from "../firebase";
 import { setSelectedSize } from "../redux/reducers/book";
-import { setbackground } from "../redux/reducers/setBackground";
 import Header from "../Shared/Header";
 import { adjustColorBrightness, inputFields } from "../utils/features";
 import { convertFileToDataURL } from "../utils/upload/convertFiletoBase64";
@@ -41,7 +39,8 @@ const PdfToImages = () => {
   const [heigthOfBook, setHeigthOfBook] = useState<number>();
   const [widthOfBook, setWidthOfBook] = useState<number>();
   const [audioFile, setAudioFile] = useState<string | null>();
-  const [logo,setLogo] = useState<string | null>()
+  const [logo, setLogo] = useState<string | null>();
+
   //---------------------- Globals variables ----------------------
 
   //----------------------- A L L   M E T H O D S   OR   H A N D L E R S -----------------------
@@ -62,7 +61,8 @@ const PdfToImages = () => {
 
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>,
-    type: string
+    type: string,
+    id: number
   ) => {
     const uploadedFile = event.target.files?.[0];
     if (uploadedFile && uploadedFile.type === "application/pdf") {
@@ -71,11 +71,13 @@ const PdfToImages = () => {
       console.log("audio selected");
       const audioURL = await convertFileToDataURL(uploadedFile!);
       setAudioFile(audioURL);
-    } else if (type === "image/*"){
+    } else if (type === "image/*" && id == 3) {
       const logoURL = await convertFileToDataURL(uploadedFile!);
-      setLogo(logoURL)
+      setLogo(logoURL);
       console.log("image logo selected");
-
+    } else if (id === 4) {
+      const bgURL = await convertFileToDataURL(uploadedFile!);
+      setBackgroundImage(bgURL);
     } else {
       toast.error("Please upload a valid PDF file.");
     }
@@ -98,31 +100,17 @@ const PdfToImages = () => {
       setHeigthOfBook(height);
       setWidthOfBook(width);
       // --------------------------------------------------------------------------
-      const aspectRationofScreen = window.innerWidth / window.innerHeight;
-      console.log("aspectRationofScreen:", aspectRationofScreen);
-
       const aspectRationOfBook = Number(width) / Number(height);
-      // 600 / 400
-      console.log("aspectRationOfBook:", aspectRationOfBook);
-
       const availableHeigth = window.innerHeight - height;
-      console.log("availableHeigth:", availableHeigth);
       const availableWidth = window.innerWidth / 2 - width;
-      console.log("availableWidth:", availableWidth);
 
       // check if width negative and  height positive is available or not
       if (availableWidth < 0 && availableHeigth > 0) {
         // negative value
         console.log("heigth + width -");
-        const negativeValueTopositive = Math.abs(availableWidth);
-        console.log("negativeValueTopositive:", negativeValueTopositive);
         const newWidthOfFlipbook =
           window.innerWidth / 2 - window.innerWidth * 0.1;
-        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
-
         const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
-        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
-
         dispatch(
           setSelectedSize({
             width: newWidthOfFlipbook,
@@ -133,16 +121,11 @@ const PdfToImages = () => {
       } else if (availableHeigth > 0 && availableWidth > 0) {
         console.log("heigth + width +");
         const newWidthOfFlipbook = availableWidth / 2 + width;
-        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
-
         const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
-        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
 
         if (newHeigthOFflipbook > window.innerHeight) {
           const newHeight = window.innerHeight * 0.8;
-          console.log("newHeight:", newHeight);
           const newWidth = newHeight * aspectRationOfBook;
-          console.log("newWidth:", newWidth);
 
           dispatch(
             setSelectedSize({
@@ -164,11 +147,7 @@ const PdfToImages = () => {
 
         if (width > height) {
           const newWidthOfFlipbook = (window.innerWidth / 2) * 0.9;
-          // const negativeValueTopositive = Math.abs(availableWidth);
-          console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
-
           const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
-          console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
 
           dispatch(
             setSelectedSize({
@@ -178,10 +157,7 @@ const PdfToImages = () => {
           );
         } else {
           const newHeigthOFflipbook = window.innerHeight * 0.9;
-          console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
-
           const newWidthOfFlipbook = aspectRationOfBook * newHeigthOFflipbook;
-          console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
           dispatch(
             setSelectedSize({
               width: newWidthOfFlipbook,
@@ -192,11 +168,7 @@ const PdfToImages = () => {
       } else if (availableHeigth < 0 && availableWidth > 0) {
         console.log("heigth - width +");
         const newHeigthOFflipbook = window.innerHeight * 0.8;
-        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
-
         const newWidthOfFlipbook = newHeigthOFflipbook * aspectRationOfBook;
-        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
-
         dispatch(
           setSelectedSize({
             width: newWidthOfFlipbook,
@@ -217,22 +189,9 @@ const PdfToImages = () => {
       );
 
       storedImages[pageNumber - 1] = dataUrl;
-      localStorage.setItem("pdf_images", JSON.stringify(storedImages));
-      console.log(`Page ${pageNumber} saved to localStorage.`);
-      // dispatch(setSelectedSize({ width, height }));
     }, 100);
   };
 
-  // ---------------------------------- Handle to change the background image---------------------
-
-  const hanldeBackgroundChange = (value: string | null) => {
-    if (value) {
-      setBackgroundImage(value);
-      dispatch(setbackground(value));
-    } else {
-      console.log("no background images is selected");
-    }
-  };
   // ---------------------------------- method to upload the images and  background image on firestore---------------
   const uploadToFirebase = async () => {
     const bookName = file && file.name;
@@ -242,7 +201,7 @@ const PdfToImages = () => {
     if (file) {
       try {
         // Use Promise.all to upload all images, background image, and audio concurrently
-        const [uploadedImages, backgroundImageURl, backgroundAudio,logoURL] =
+        const [uploadedImages, backgroundImageURl, backgroundAudio, logoURL] =
           await Promise.all([
             // Upload images
             Promise.all(
@@ -268,8 +227,9 @@ const PdfToImages = () => {
               ? uploadAudioOnFirebase(audioFile, bookName as string)
               : Promise.resolve(""),
 
-
-              logo?uploadImageOnFirebase(logo,bookName as string) : Promise.resolve('')
+            logo
+              ? uploadImageOnFirebase(logo, bookName as string)
+              : Promise.resolve(""),
           ]);
 
         // Post the data to Firestore
@@ -282,7 +242,7 @@ const PdfToImages = () => {
           coverColor,
           spineColor,
           backgroundAudio,
-          logo:logoURL
+          logo: logoURL,
         });
 
         // Set unique book ID for sharing
@@ -305,7 +265,6 @@ const PdfToImages = () => {
 
   // ---------------------------------- method to copy the url into clipboard ---------------
   const spineColor = adjustColorBrightness(coverColor, 0.5);
-  console.log("spineColor:", spineColor);
 
   // ----------------------------------- fetch the data for a book--------------------------------
 
@@ -314,7 +273,7 @@ const PdfToImages = () => {
       sx={{
         width: "100vw",
         display: "flex",
-        overflow:'auto',
+        overflow: "auto",
         padding: "0rem 2rem ",
       }}
     >
@@ -322,13 +281,13 @@ const PdfToImages = () => {
       <Box
         sx={{
           width: "20%",
-          height:"100vh",
+          height: "100vh",
           overflowY: "auto",
         }}
       >
         <Stack
-        height={'auto'}
-        overflow = 'auto'
+          height={"auto"}
+          overflow="auto"
           // direction={"row"}
           display={"flex"}
           alignItems={"center"}
@@ -341,6 +300,7 @@ const PdfToImages = () => {
             mt: 2,
           }}
         >
+          {/* ------------------------------- PDF upload + image upload + logo upload + background music upload---------------------------------- */}
           <Stack direction={"column"} gap={2} alignItems={"start"} sx={{}}>
             {inputFields.map((ele) => {
               return (
@@ -381,7 +341,9 @@ const PdfToImages = () => {
                       <input
                         type={ele.type}
                         accept={ele.accept}
-                        onChange={(e) => handleFileUpload(e, ele.accept)}
+                        onChange={(e) =>
+                          handleFileUpload(e, ele.accept, ele.id)
+                        }
                         hidden
                         required
                       />
@@ -392,65 +354,12 @@ const PdfToImages = () => {
               );
             })}
 
-            {/* --------------------- upload the backround image ------------------------------- */}
-            <UploadBg onBackgroundChange={hanldeBackgroundChange} />
-
-            <Typography
-              sx={{
-                fontWeight: "bold",
-                fontSize: "1rem",
-              }}
-            >
-              Choose the color
-            </Typography>
-
-            <Stack direction={"row"} gap={1} width={"100%"}>
-              <Box
-                sx={{
-                  flex: 1,
-                }}
-              >
-                <Typography variant="subtitle2" fontWeight={"bold"}>
-                  Cover
-                </Typography>
-
-                <Button
-                  variant={isCoverColorPickerVisible ? "contained" : "text"}
-                  sx={{
-                    width: "2rem",
-                    height: "2rem",
-                    bgcolor: coverColor,
-                  }}
-                  onClick={() => {
-                    setIsCoverColorPickerVisible(true);
-                  }}
-                ></Button>
-              </Box>
-
-              <Box
-                sx={{
-                  flex: 1,
-                }}
-              >
-                <Typography variant="subtitle2" fontWeight={"bold"}>
-                  Spine
-                </Typography>
-                <Button
-                  disabled
-                  sx={{
-                    width: "2rem",
-                    height: "2rem",
-                    bgcolor: adjustColorBrightness(coverColor, 0.5),
-                    //0.5=== 50% darker
-                  }}
-                ></Button>
-              </Box>
-            </Stack>
-
-            {/* ----------------------- set the cover color---------------------------- */}
-            <Box mx={"auto"}>
-              <HexColorPicker color={coverColor} onChange={setCoverColor} />
-            </Box>
+            <ColorPicker
+              coverColor={coverColor}
+              isCoverColorPickerVisible={isCoverColorPickerVisible}
+              setCoverColor={setCoverColor}
+              setIsCoverColorPickerVisible={setIsCoverColorPickerVisible}
+            />
 
             {/* -------------------------- Save button---------------------------------- */}
             <Button
@@ -472,17 +381,22 @@ const PdfToImages = () => {
                 "Save Changes"
               )}
             </Button>
-            <Link to="/table" style={{
-              marginInline:'auto'
-            }}>
-              <Button variant="text" sx={{
-                textTransform: "none",
-
-              }}>Go to table</Button>
+            <Link
+              to="/table"
+              style={{
+                marginInline: "auto",
+              }}
+            >
+              <Button
+                variant="text"
+                sx={{
+                  textTransform: "none",
+                }}
+              >
+                Go to table
+              </Button>
             </Link>
-         
           </Stack>
-
         </Stack>
 
         {/* ---------------------- render the pdf pages [display none ] */}
@@ -545,7 +459,7 @@ const PdfToImages = () => {
             coverColor={coverColor}
             spineColor={spineColor}
             logoTemp={logo}
-            audioFile = {audioFile ? audioFile:''}
+            audioFile={audioFile ? audioFile : ""}
           />
         </Box>
       </Box>

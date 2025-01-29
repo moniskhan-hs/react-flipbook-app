@@ -1,7 +1,14 @@
 import { VolumeOff, VolumeUp } from "@mui/icons-material";
-import { Box, IconButton, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import { doc, getDoc } from "firebase/firestore";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -34,42 +41,30 @@ const FlipbookView = ({
   logoTemp,
   audioFile,
 }: Props) => {
-  console.log("isFetchingData:", isFetchingData);
   //--------------------------------------------State------------------------------------
   const { bookid } = useParams();
-  console.log("bookid:", bookid);
   const flipBookRef = useRef();
   const [currentPage, setCurrentPage] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(0);
   const { width, height } = useSelector(
     (state: { book: BookStateInitState }) => state.book
   );
   const dispatch = useDispatch();
-
-  const [isStackedVisible, setIsStackedVisible] = useState(false);
-  console.log("totalPages:", totalPages);
-
   const [documentData, setDocumentData] =
     useState<BookDataFromFirestoreType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  console.log("error:", error);
   // to check the file is uploaded has the desktop nature and being view in mobile
   const [isDesktopMobileViewd, setIsDesktopMobileViewd] =
     useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
 
   //------------------------------------------- Global variable [entire file]----------------------------
-
-  console.log("isStackedVisible:", isStackedVisible);
 
   const conditionRef = useRef<string | null>(null);
 
   const theme = useTheme();
 
   const isMobileView = useMediaQuery(theme.breakpoints.down("sm"));
-  // Adjust breakpoint as needed
-  console.log("isMobileView:", isMobileView);
 
   // --------------------------------------------Sound Logic--------------------------------
 
@@ -82,33 +77,16 @@ const FlipbookView = ({
       audioRef.current.muted = !audioRef.current.muted;
       setIsMuted(audioRef.current.muted);
     }
-    // setIsMuted(pre=>!pre)
   };
 
-  // -------------------------------------- PDF Logic-----------------------------
-
-  // Update total pages when `flipBookRef` or `selectedSize` changes
-  useEffect(() => {
-    /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
-    if (flipBookRef.current && flipBookRef.current.pageFlip()) {
-      {
-        /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
-        setTotalPages(flipBookRef.current.pageFlip().getPageCount());
-      }
-    }
-    console.log("home page rendered");
-  }, [flipBookRef, height, width]);
+  // -------------------------------------- PDF Logic----------------------------
 
   // Reset currentPage when selectedSize changes
   useEffect(() => {
     setCurrentPage(0); // Reset page to 0 when size changes
-    console.log("home page rendered");
   }, [height, width]);
 
   const onPageChange = React.useCallback((event: { data: number }) => {
-    console.log("event:", event);
-    console.log("this line rendered");
-
     setCurrentPage((prev) => (prev !== event.data ? event.data : prev));
   }, []);
 
@@ -116,7 +94,6 @@ const FlipbookView = ({
     data: string;
     object: { pages: { currentPageIndex: number } };
   }) => {
-    console.log("event:", event);
     if (flipSoundRef.current) {
       if (event.data == "flipping") {
         flipSoundRef.current.play();
@@ -126,44 +103,22 @@ const FlipbookView = ({
     conditionRef.current = event.data;
   };
 
-  // UseLayoutEffect to manage StackedRigth visibility
-  useLayoutEffect(() => {
-    if (currentPage > 0 && currentPage < 30) {
-      setIsStackedVisible(true);
-    } else {
-      setIsStackedVisible(false);
-    }
-    console.log("home page rendered");
-  }, [currentPage]);
-
   // ---------------------------------- Fetching the Data from the cloud firestore and desktop view--------------------
 
   useEffect(() => {
     const handleresize = (heigthOfBook: number, widthOfBook: number) => {
-      const aspectRationofScreen = window.innerWidth / window.innerHeight;
-      console.log("aspectRationofScreen:", aspectRationofScreen);
       // fetch the height and width of book from data base
       const aspectRationOfBook = Number(widthOfBook) / Number(heigthOfBook);
-
-      console.log("aspectRationOfBook:", aspectRationOfBook);
-
       const availableHeigth = window.innerHeight - heigthOfBook;
-      console.log("availableHeigth:", availableHeigth);
       const availableWidth = window.innerWidth / 2 - widthOfBook;
-      console.log("availableWidth:", availableWidth);
 
       // check if width negative and  height positive is available or not
       if (availableWidth < 0 && availableHeigth > 0) {
         // negative value
-        console.log("heigth + width -");
-        const negativeValueTopositive = Math.abs(availableWidth);
-        console.log("negativeValueTopositive:", negativeValueTopositive);
         const newWidthOfFlipbook =
           window.innerWidth / 2 - window.innerWidth * 0.1;
-        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
 
         const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
-        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
 
         dispatch(
           setSelectedSize({
@@ -175,16 +130,12 @@ const FlipbookView = ({
       } else if (availableHeigth > 0 && availableWidth > 0) {
         console.log("heigth + width +");
         const newWidthOfFlipbook = availableWidth / 2 + widthOfBook;
-        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
 
         const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
-        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
 
         if (newHeigthOFflipbook > window.innerHeight) {
           const newHeight = window.innerHeight * 0.8;
-          console.log("newHeight:", newHeight);
           const newWidth = newHeight * aspectRationOfBook;
-          console.log("newWidth:", newWidth);
 
           dispatch(
             setSelectedSize({
@@ -204,10 +155,8 @@ const FlipbookView = ({
       } else if (availableHeigth < 0 && availableWidth > 0) {
         console.log("heigth - width +");
         const newHeigthOFflipbook = window.innerHeight * 0.8;
-        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
 
         const newWidthOfFlipbook = newHeigthOFflipbook * aspectRationOfBook;
-        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
 
         dispatch(
           setSelectedSize({
@@ -270,41 +219,24 @@ const FlipbookView = ({
     if (!isMobileView) return;
 
     const handleresize = (heigthOfBook: number, widthOfBook: number) => {
-      const aspectRationofScreen = window.innerWidth / window.innerHeight;
-      console.log("aspectRationofScreen:", aspectRationofScreen);
       // fetch the height and width of book from data base
       const aspectRationOfBook = Number(widthOfBook) / Number(heigthOfBook);
-
-      console.log("aspectRationOfBook:", aspectRationOfBook);
-
       const availableHeigth = window.innerHeight - heigthOfBook;
-      console.log("availableHeigth:", availableHeigth);
       const availableWidth = window.innerWidth / 2 - widthOfBook;
-      console.log("availableWidth:", availableWidth);
-
       // check if width negative and  height positive is available or not
       if (availableWidth < 0 && availableHeigth > 0) {
         console.log("heigth + width -");
 
         // negative value
-
-        const negativeValueTopositive = Math.abs(availableWidth);
-        console.log("negativeValueTopositive:", negativeValueTopositive);
         const newWidthOfFlipbook = window.innerHeight;
-        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
 
         const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
-        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
 
         if (newWidthOfFlipbook > newHeigthOFflipbook) {
           console.log("width > heigth");
           const newWidthOfFlipbook =
             window.innerHeight - window.innerHeight * 0.2;
-          // const negativeValueTopositive = Math.abs(availableWidth);
-          console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
-
           const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
-          console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
 
           dispatch(
             setSelectedSize({
@@ -326,17 +258,12 @@ const FlipbookView = ({
       } else if (availableHeigth > 0 && availableWidth > 0) {
         console.log("heigth + width +");
         const newWidthOfFlipbook = availableWidth / 2 + widthOfBook;
-        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
 
         const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
-        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
 
         if (newHeigthOFflipbook > window.innerHeight) {
           const newHeight = window.innerHeight * 0.65;
-          console.log("newHeight:", newHeight);
           const newWidth = newHeight * aspectRationOfBook;
-          console.log("newWidth:", newWidth);
-
           dispatch(
             setSelectedSize({
               width: newWidth,
@@ -355,11 +282,8 @@ const FlipbookView = ({
       } else if (availableHeigth < 0 && availableWidth > 0) {
         console.log("heigth - width +");
         const newHeigthOFflipbook = window.innerHeight * 0.65;
-        console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
 
         const newWidthOfFlipbook = newHeigthOFflipbook * aspectRationOfBook;
-        console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
-
         dispatch(
           setSelectedSize({
             width: newWidthOfFlipbook,
@@ -371,12 +295,7 @@ const FlipbookView = ({
 
         if (width > height) {
           const newWidthOfFlipbook = (window.innerWidth / 2) * 0.9;
-          // const negativeValueTopositive = Math.abs(availableWidth);
-          console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
-
           const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
-          console.log("newHeigthOFflipbook:", newHeigthOFflipbook);
-
           dispatch(
             setSelectedSize({
               width: newWidthOfFlipbook,
@@ -386,7 +305,6 @@ const FlipbookView = ({
         } else {
           const newWidthOfFlipbook = window.innerWidth;
           const newHeigthOFflipbook = newWidthOfFlipbook / aspectRationOfBook;
-          console.log("newWidthOfFlipbook:", newWidthOfFlipbook);
           dispatch(
             setSelectedSize({
               width: newWidthOfFlipbook,
@@ -395,7 +313,7 @@ const FlipbookView = ({
           );
         }
       } else {
-        console.log("yeh konsa case hai....");
+        console.log("This is the other case....");
       }
     };
 
@@ -446,13 +364,17 @@ const FlipbookView = ({
     document.body.style.overflow = isDesktopMobileViewd ? "auto" : "hidden";
   }, [isDesktopMobileViewd]); // Re-run whenever isOverflowHidden changes
 
+  // --------------------ensuring the audio starts playin initially--------------
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 1; // Set initial volume
+    }
+  }, []);
+
   // --------------- showing the loader----------------------------
-
-  console.log("currentPage:", currentPage);
-  console.log("total pages:", totalPages);
-
   if (loading && isFetchingData && bookid) return <PageLoader></PageLoader>;
 
+  if (error) return <h2>Something went wrong</h2>;
   return (
     <Box
       sx={{
@@ -461,7 +383,6 @@ const FlipbookView = ({
         alignItems: isMobileView ? "none" : "center",
         justifyContent: isMobileView ? "none" : "center",
         padding: isMobileView ? "0rem" : "1rem", // Padding around the container
-
         width: "100vw", // full width of the screen
         height: "100vh", // full heigth of the screen
         overflow: "hidden",
@@ -484,7 +405,6 @@ const FlipbookView = ({
             ? width > height
               ? {
                   // ---------------- when desktip view pdf uploaded and being view by mobile
-
                   transform: " rotate(-90deg)",
                 }
               : {
@@ -643,9 +563,18 @@ const FlipbookView = ({
                   ) : (
                     <StackedRigth></StackedRigth>
                   )
-                ) : // unposted
-              
-               ( images && images.length >0 && ( images.length % 2 == 1 && currentPage == images.length - 1 ? ("") : (<StackedRigth />  )))
+                ) : (
+                  // unposted
+
+                  images &&
+                  images.length > 0 &&
+                  (images.length % 2 == 1 &&
+                  currentPage == images.length - 1 ? (
+                    ""
+                  ) : (
+                    <StackedRigth />
+                  ))
+                )
               }
             </Box>
           )}
@@ -667,18 +596,20 @@ const FlipbookView = ({
               backgroundPosition: "center",
             }}
           >
-{!isFetchingData &&  logoTemp==null && <Typography 
-
-sx={{
-  fontWeight:"bold",
-  fontStyle:'italic',
-  fontSize:"1.5rem"
-}}
->Your Logo</Typography>}
-
+            {!isFetchingData && logoTemp == null && (
+              <Typography
+                sx={{
+                  fontWeight: "bold",
+                  fontStyle: "italic",
+                  fontSize: "1.5rem",
+                }}
+              >
+                Your Logo
+              </Typography>
+            )}
           </Box>
         )}
-
+        {/* ------------------------------ background Audio ICon--------------------------------- */}
         <div
           style={{
             position: "absolute",
@@ -694,7 +625,7 @@ sx={{
                 ? documentData?.backgroundAudio
                 : audioFile
             }
-            // autoPlay
+            autoPlay
             loop
             preload="auto"
           ></audio>
