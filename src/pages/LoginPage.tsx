@@ -8,14 +8,17 @@ import {
 } from "@mui/material";
 import {
   ConfirmationResult,
+  OAuthProvider,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  signInWithPopup,
   UserCredential,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
+import { Microsoft } from "@mui/icons-material";
 
 const LoginPage = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -27,6 +30,7 @@ const LoginPage = () => {
   const [result, setResult] = useState<ConfirmationResult | null>(null);
   const [user, setUser] = useState<UserCredential | undefined>();
   const [reCaptcha, setReCaptcha] = useState<RecaptchaVerifier>();
+  const microsoftProvider = new OAuthProvider("microsoft.com");
 
   const navigate = useNavigate();
 
@@ -84,6 +88,42 @@ const LoginPage = () => {
       toast.error("Invalid OTP");
       reCaptcha?.clear();
     }
+  };
+
+
+
+
+  const loginWithMicrosoft = async () => {
+    // console.log("auth:", auth);
+    // try {
+    //   // microsoftProvider.setCustomParameters({
+    //   //   tenant: "23d45b26-0876-4494-bfb8-369aecda8e1a",
+    //   // });
+
+    //   const result = await signInWithPopup(auth, microsoftProvider);
+    //   console.log("Microsoft Login Success:", result.user);
+    //   toast.success(`Welcome, ${result.user.displayName}!`);
+    // } catch (error:unknown) {
+    //   console.error("Error during Microsoft login:", error.message);
+    //   // toast.error(`Login Failed: ${error.message}`);
+    // }
+
+    signInWithPopup(auth, microsoftProvider)
+    .then((result) => {
+      // User is signed in.
+      // IdP data available in result.additionalUserInfo.profile.
+  
+      // Get the OAuth access token and ID Token
+      const credential = OAuthProvider.credentialFromResult(result);
+      const accessToken = credential.accessToken;
+      const idToken = credential.idToken;
+    })
+    .catch((error) => {
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
+      console.error("Full error:", error);
+      // Handle error.
+    });
   };
 
   return (
@@ -198,6 +238,31 @@ const LoginPage = () => {
             <div id="recaptcha-container"></div>
           </Box>
         </Stack>
+        
+        <Button
+            onClick={loginWithMicrosoft}
+            variant="outlined"
+            startIcon={<Microsoft />} // Custom Microsoft Logo
+            sx={{
+              textTransform: "none",
+              borderRadius: "4px",
+              color: "black",
+              borderColor: "#A6A6A6",
+              padding: "6px 12px",
+              fontSize: "14px",
+              fontWeight: "500",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              backgroundColor: "white",
+              "&:hover": {
+                backgroundColor: "#f3f3f3",
+                borderColor: "#999",
+              },
+            }}
+          >
+            Sign in with Microsoft
+          </Button>
       </Box>
 
 
