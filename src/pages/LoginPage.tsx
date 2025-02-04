@@ -1,3 +1,4 @@
+import { Microsoft } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -18,7 +19,6 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
-import { Microsoft } from "@mui/icons-material";
 
 const LoginPage = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -30,7 +30,7 @@ const LoginPage = () => {
   const [result, setResult] = useState<ConfirmationResult | null>(null);
   const [user, setUser] = useState<UserCredential | undefined>();
   const [reCaptcha, setReCaptcha] = useState<RecaptchaVerifier>();
-  const microsoftProvider = new OAuthProvider("microsoft.com");
+  const microsoftProvider = new OAuthProvider('microsoft.com');
 
   const navigate = useNavigate();
 
@@ -94,19 +94,6 @@ const LoginPage = () => {
 
 
   const loginWithMicrosoft = async () => {
-    // console.log("auth:", auth);
-    // try {
-    //   // microsoftProvider.setCustomParameters({
-    //   //   tenant: "23d45b26-0876-4494-bfb8-369aecda8e1a",
-    //   // });
-
-    //   const result = await signInWithPopup(auth, microsoftProvider);
-    //   console.log("Microsoft Login Success:", result.user);
-    //   toast.success(`Welcome, ${result.user.displayName}!`);
-    // } catch (error:unknown) {
-    //   console.error("Error during Microsoft login:", error.message);
-    //   // toast.error(`Login Failed: ${error.message}`);
-    // }
 
     signInWithPopup(auth, microsoftProvider)
     .then((result) => {
@@ -257,7 +244,8 @@ const LoginPage = () => {
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              backgroundColor: "white",
+              mt:2,           
+                 backgroundColor: "white",
               "&:hover": {
                 backgroundColor: "#f3f3f3",
                 borderColor: "#999",
