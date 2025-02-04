@@ -110,13 +110,16 @@ const LoginPage = () => {
 
     signInWithPopup(auth, microsoftProvider)
     .then((result) => {
+      console.log('result:', result)
       // User is signed in.
       // IdP data available in result.additionalUserInfo.profile.
   
       // Get the OAuth access token and ID Token
       const credential = OAuthProvider.credentialFromResult(result);
-      const accessToken = credential.accessToken;
-      const idToken = credential.idToken;
+      const accessToken = credential?.accessToken;
+      console.log('accessToken:', accessToken)
+      const idToken = credential?.idToken;
+      console.log('idToken:', idToken)
     })
     .catch((error) => {
       console.error("Error code:", error.code);
