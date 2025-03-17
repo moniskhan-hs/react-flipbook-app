@@ -1,4 +1,3 @@
-import { Microsoft } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -9,15 +8,13 @@ import {
 } from "@mui/material";
 import {
   ConfirmationResult,
-  OAuthProvider,
   RecaptchaVerifier,
   signInWithPhoneNumber,
-  signInWithPopup,
-  UserCredential,
+  UserCredential
 } from "firebase/auth";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 
 const LoginPage = () => {
@@ -30,7 +27,7 @@ const LoginPage = () => {
   const [result, setResult] = useState<ConfirmationResult | null>(null);
   const [user, setUser] = useState<UserCredential | undefined>();
   const [reCaptcha, setReCaptcha] = useState<RecaptchaVerifier>();
-  const microsoftProvider = new OAuthProvider('microsoft.com');
+  // const microsoftProvider = new OAuthProvider('microsoft.com');
 
   const navigate = useNavigate();
 
@@ -93,28 +90,28 @@ const LoginPage = () => {
 
 
 
-  const loginWithMicrosoft = async () => {
+  // const loginWithMicrosoft = async () => {
 
-    signInWithPopup(auth, microsoftProvider)
-    .then((result) => {
-      console.log('result:', result)
-      // User is signed in.
-      // IdP data available in result.additionalUserInfo.profile.
+  //   signInWithPopup(auth, microsoftProvider)
+  //   .then((result) => {
+  //     console.log('result:', result)
+  //     // User is signed in.
+  //     // IdP data available in result.additionalUserInfo.profile.
   
-      // Get the OAuth access token and ID Token
-      const credential = OAuthProvider.credentialFromResult(result);
-      const accessToken = credential?.accessToken;
-      console.log('accessToken:', accessToken)
-      const idToken = credential?.idToken;
-      console.log('idToken:', idToken)
-    })
-    .catch((error) => {
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
-      console.error("Full error:", error);
-      // Handle error.
-    });
-  };
+  //     // Get the OAuth access token and ID Token
+  //     const credential = OAuthProvider.credentialFromResult(result);
+  //     const accessToken = credential?.accessToken;
+  //     console.log('accessToken:', accessToken)
+  //     const idToken = credential?.idToken;
+  //     console.log('idToken:', idToken)
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error code:", error.code);
+  //     console.error("Error message:", error.message);
+  //     console.error("Full error:", error);
+  //     // Handle error.
+  //   });
+  // };
 
   return (
     <Box
