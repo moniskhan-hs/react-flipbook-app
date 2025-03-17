@@ -229,7 +229,7 @@ const LoginPage = () => {
           </Box>
         </Stack>
         
-        <Button
+        {/* <Button
             onClick={loginWithMicrosoft}
             variant="outlined"
             startIcon={<Microsoft />} // Custom Microsoft Logo
@@ -253,11 +253,11 @@ const LoginPage = () => {
             }}
           >
             Sign in with Microsoft
-          </Button>
+          </Button> */}
       </Box>
 
 
-      <Stack direction={'row'} justifyContent={'end'} gap={1}>
+      {/* <Stack direction={'row'} justifyContent={'end'} gap={1}>
         
         <Box>
 
@@ -274,7 +274,7 @@ const LoginPage = () => {
           Table
         </Link>
           </Box>
-         </Stack>
+         </Stack> */}
     </Box>
   );
 };
