@@ -9,11 +9,22 @@ import GridTable from "./pages/GridTable";
 import Loader from "./Shared/Loader";
 // import PdfToImages from "./pages/PageSizeViewer";
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString();
+// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+//   "pdfjs-dist/build/pdf.worker.min.mjs",
+//   import.meta.url
+// ).toString();
 
+if (import.meta.env.PROD) {
+  pdfjs.GlobalWorkerOptions.workerSrc = 'https://react-flipbook-app.vercel.app/node_modules/pdfjs-dist/build/pdf.worker.min.mjs';
+} else {
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    "pdfjs-dist/build/pdf.worker.min.mjs",
+    import.meta.url
+  ).toString();
+}
+
+
+console.log('pdfjs.GlobalWorkerOptions.workerSrc:', pdfjs.GlobalWorkerOptions.workerSrc)
 const FlipbookView = lazy(() => import("./pages/Flipbook"));
 const PdfToImages = lazy(() => import("./pages/PageSizeViewer"));
 

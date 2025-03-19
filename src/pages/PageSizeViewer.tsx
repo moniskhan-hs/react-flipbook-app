@@ -96,6 +96,7 @@ const PdfToImages = () => {
     // Ensure canvas is ready
     setTimeout(() => {
       const dataUrl = canvas.toDataURL("image/png", 1.0); // High-quality image
+      // console.log('dataUrl:', dataUrl)
       const { width, height } = canvas;
       setHeigthOfBook(height);
       setWidthOfBook(width);
@@ -189,7 +190,7 @@ const PdfToImages = () => {
       );
 
       storedImages[pageNumber - 1] = dataUrl;
-    }, 100);
+    }, 4000);
   };
 
   // ---------------------------------- method to upload the images and  background image on firestore---------------
