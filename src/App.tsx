@@ -4,10 +4,8 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-d
 import { onAuthStateChanged } from "firebase/auth";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
-import Pr̥otectedRoute from "./components/ProtectedRoutes";
 import { auth } from "./firebase";
 import GridTable from "./pages/GridTable";
-import LoginComponent from "./pages/LoginPage2";
 import Loader from "./Shared/Loader";
 // import PdfToImages from "./pages/PageSizeViewer";
 
