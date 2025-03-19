@@ -15,7 +15,7 @@ import Loader from "./Shared/Loader";
 // ).toString();
 
 if (import.meta.env.PROD) {
-  pdfjs.GlobalWorkerOptions.workerSrc = 'https://react-flipbook-app.vercel.app/node_modules/pdfjs-dist/build/pdf.worker.min.mjs';
+  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 } else {
   pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     "pdfjs-dist/build/pdf.worker.min.mjs",
