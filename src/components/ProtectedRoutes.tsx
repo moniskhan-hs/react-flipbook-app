@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-
+// ignor type Props
 type Props = {
   children?: ReactElement;
   admin?: boolean;
@@ -8,6 +8,8 @@ type Props = {
   isAuthenticated: boolean;
   redirect?: string;
 };
+
+
 
 const Pr̥otectedRoute = ({
   children,

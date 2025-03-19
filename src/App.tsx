@@ -1,14 +1,14 @@
 import { pdfjs } from "react-pdf";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 // import DemoBook from "./pages/Home";
+import { onAuthStateChanged } from "firebase/auth";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { Toaster } from "react-hot-toast";
-import GridTable from "./pages/GridTable";
-import LoginPage from "./pages/LoginPage";
-import Loader from "./Shared/Loader";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./firebase";
 import Pr̥otectedRoute from "./components/ProtectedRoutes";
+import { auth } from "./firebase";
+import GridTable from "./pages/GridTable";
+import LoginComponent from "./pages/LoginPage2";
+import Loader from "./Shared/Loader";
 // import PdfToImages from "./pages/PageSizeViewer";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -20,20 +20,27 @@ const FlipbookView = lazy(() => import("./pages/Flipbook"));
 const PdfToImages = lazy(() => import("./pages/PageSizeViewer"));
 
 const App = () => {
-  const [isLoggedUser, setIsLoggedUser] = useState(false);
+  // const navigate = useNavigate();
+  const [isLoggedUser, setIsLoggedUser] = useState<boolean>();
 
   useEffect(() => {
     // user= firebase retured user
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log("user:", user);
-        setIsLoggedUser(true);
+        // not able to navigate from here
+        // setIsLoggedUser(true)
+        //  <Navigate to={'/table'} />
+        // window.location.href('/table')
+        // window.open('http://localhost:5173/table')
       } else {
-        console.log("no user is there");
         setIsLoggedUser(false);
       }
     });
   }, []);
+
+  console.log("isLoggedUser:", isLoggedUser);
+  /// check use is authe or not
 
   return (
     <Router>
@@ -45,16 +52,27 @@ const App = () => {
             element={<FlipbookView isFetchingData={true} />}
           />
           {/* --------------------------------------protected routes---------------- */}
-          <Route
+          {/* <Route
             element={
-              <Pr̥otectedRoute isAuthenticated={isLoggedUser ? true : false}  redirect="/"/>  // redirect to the un-authenticate user to login route [/ in this case]
+              <Pr̥otectedRoute
+                isAuthenticated={isLoggedUser ? true : false}
+                redirect="/backend/web/firebase-login"
+              /> // redirect to the un-authenticate user to login route [/ in this case]
             }
           >
-            <Route path="/upload" element={<PdfToImages />} />
+          </Route> */}
+                  <Route path="/" element={<Navigate to="/upload" replace />} />
+
             <Route path="/table" element={<GridTable />} />
-          </Route>
+          <Route path="/upload" element={<PdfToImages />} />
           {/* -------------------------------- your login route--------------------------- */}
-          <Route path="/" element={<LoginPage />} />
+          {/* <Route path="/differentRoute" element={<LoginComponent />} /> */}
+          {/* <Route path="/" element={
+
+
+<h2> User is login here </h2>
+
+          } /> */}
         </Routes>
       </Suspense>
       <Toaster position="top-center" />
