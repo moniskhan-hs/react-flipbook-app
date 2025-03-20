@@ -10,7 +10,6 @@ import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Document, Page } from "react-pdf";
 import { useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
 import ColorPicker from "../components/uploadPage/ColorPicker";
 import { db } from "../firebase";
 import { setSelectedSize } from "../redux/reducers/book";
@@ -27,7 +26,7 @@ const PdfToImages = () => {
     { dataUrl: string; width: number; height: number }[]
   >([]);
   const [file, setFile] = useState<File | null>(null);
-  console.log('file:', file)
+  console.log("file:", file);
   const [coverColor, setCoverColor] = useState("#aabbcc");
   const dispatch = useDispatch();
   const processedPages = useRef<Set<number>>(new Set());
@@ -41,7 +40,9 @@ const PdfToImages = () => {
   const [widthOfBook, setWidthOfBook] = useState<number>();
   const [audioFile, setAudioFile] = useState<string | null>();
   const [logo, setLogo] = useState<string | null>();
-
+  const [selectedFiles, setSelectedFiles] = useState<{ [key: number]: File | undefined }>(
+    {}
+  );
   //---------------------- Globals variables ----------------------
 
   //----------------------- A L L   M E T H O D S   OR   H A N D L E R S -----------------------
@@ -66,6 +67,8 @@ const PdfToImages = () => {
     id: number
   ) => {
     const uploadedFile = event.target.files?.[0];
+    setSelectedFiles((prev) => ({ ...prev, [id]: uploadedFile }));
+    console.log("uploadedFile:", uploadedFile);
     if (uploadedFile && uploadedFile.type === "application/pdf") {
       setFile(uploadedFile);
     } else if (type === "audio/*") {
@@ -303,10 +306,30 @@ const PdfToImages = () => {
           }}
         >
           {/* ------------------------------- PDF upload + image upload + logo upload + background music upload---------------------------------- */}
-          <Stack direction={"column"} gap={2} alignItems={"start"} sx={{}}>
+          <Stack
+            direction={"column"}
+            gap={2}
+            alignItems={"start"}
+            sx={
+              {
+                //  backgroundColor: "#f5f5f5",
+              }
+            }
+          >
             {inputFields.map((ele) => {
               return (
-                <Stack direction="column" key={ele.id} spacing={2}>
+                <Stack
+                  direction="column"
+                  key={ele.id}
+                  spacing={2}
+                  sx={
+                    {
+                      width:"100%"
+
+                      // backgroundColor: "#f5f5f5",
+                    }
+                  }
+                >
                   <Typography
                     sx={{
                       fontWeight: "bold",
@@ -324,6 +347,7 @@ const PdfToImages = () => {
                       backgroundColor: "#f5f5f5",
                       borderRadius: "8px",
                       boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                      width:"100%"
                     }}
                   >
                     <Button
@@ -350,7 +374,17 @@ const PdfToImages = () => {
                         required
                       />
                     </Button>
-                    <span>{ele.subTitle}</span>
+                  {
+                   selectedFiles[ele.id]?.name ? <span style={{
+                    color: "#1976d2",
+                    fontWeight:"bold",
+                    fontSize:"0.8rem",
+                   marginInline:"0.35rem"
+                   }}>{selectedFiles[ele.id]?.name}</span>
+                    
+                   : <span>{ele.subTitle}</span>
+
+                  }
                   </Box>
                 </Stack>
               );
@@ -383,21 +417,6 @@ const PdfToImages = () => {
                 "Save Changes"
               )}
             </Button>
-            <Link
-              to="/table"
-              style={{
-                marginInline: "auto",
-              }}
-            >
-              <Button
-                variant="text"
-                sx={{
-                  textTransform: "none",
-                }}
-              >
-                Go to table
-              </Button>
-            </Link>
           </Stack>
         </Stack>
 
@@ -442,6 +461,7 @@ const PdfToImages = () => {
           isSuccess={isSuccess}
           url={`book/bookId/${uniqueBookId}`}
           title="Copy URL"
+          isShowingTable ={true}
         />
 
         <Box

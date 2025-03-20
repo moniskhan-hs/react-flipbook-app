@@ -68,6 +68,7 @@ export default function GridTable() {
       sx={{
         width: "100%",
         height: "100%",
+        px:'5rem'
       }}
       >
         {/* -------------------------------- header----------------------------- */}

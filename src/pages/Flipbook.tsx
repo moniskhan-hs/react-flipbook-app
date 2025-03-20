@@ -3,9 +3,8 @@ import {
   Box,
   IconButton,
   Stack,
-  Typography,
   useMediaQuery,
-  useTheme,
+  useTheme
 } from "@mui/material";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
@@ -597,15 +596,22 @@ const FlipbookView = ({
             }}
           >
             {!isFetchingData && logoTemp == null && (
-              <Typography
+              <Box
                 sx={{
                   fontWeight: "bold",
                   fontStyle: "italic",
                   fontSize: "1.5rem",
+                  width: "10rem",
+                  height: "4rem",
+                  // border:'1px dotted',
+                  display:"flex",
+                  justifyContent:"center",
+                  alignItems:"center",
+                  bgcolor:"#f3f3f3"
                 }}
               >
                 Your Logo
-              </Typography>
+              </Box>
             )}
           </Box>
         )}
