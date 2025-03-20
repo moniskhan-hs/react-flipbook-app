@@ -1,6 +1,21 @@
 {
-    "rewrites": [
-      { "source": "/(.*)", "destination": "/" }
-    ]
-  }
-  
+  "version": 2,
+  "headers": [
+    {
+      "source": "/(.*)\\.mjs",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/pdf.min.mjs",
+      "destination": "https://server-worker.vercel.app/public/pdf.min.mjs",
+      "permanent": false
+    }
+  ]
+}
