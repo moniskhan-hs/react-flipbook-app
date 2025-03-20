@@ -13,9 +13,9 @@ import Loader from "./Shared/Loader";
 //   "pdfjs-dist/build/pdf.worker.min.mjs",
 //   import.meta.url
 // ).toString();
-
+// const imgPath = path.join(process.cwd(), 'public', '90x50/pc_001jpg');
 if (import.meta.env.PROD) {
-  pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+  pdfjs.GlobalWorkerOptions.workerSrc = 'https://server-worker.vercel.app/public/pdf.min.mjs';
 } else {
   pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     "pdfjs-dist/build/pdf.worker.min.mjs",
