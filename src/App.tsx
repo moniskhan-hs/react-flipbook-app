@@ -1,10 +1,8 @@
 import { pdfjs } from "react-pdf";
 import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 // import DemoBook from "./pages/Home";
-import { onAuthStateChanged } from "firebase/auth";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "react-hot-toast";
-import { auth } from "./firebase";
 import GridTable from "./pages/GridTable";
 import Loader from "./Shared/Loader";
 // import PdfToImages from "./pages/PageSizeViewer";
@@ -31,7 +29,7 @@ const PdfToImages = lazy(() => import("./pages/PageSizeViewer"));
 
 const App = () => {
   // const navigate = useNavigate();
-  const [isLoggedUser, setIsLoggedUser] = useState<boolean>();
+  // const [isLoggedUser, setIsLoggedUser] = useState<boolean>();
 
   useEffect(() => {
     // // user= firebase retured user
@@ -58,7 +56,7 @@ const App = () => {
     
   }, []);
 
-  console.log("isLoggedUser:", isLoggedUser);
+  // console.log("isLoggedUser:", isLoggedUser);
   /// check use is authe or not
 
   return (
