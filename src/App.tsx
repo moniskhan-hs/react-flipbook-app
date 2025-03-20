@@ -15,7 +15,7 @@ import Loader from "./Shared/Loader";
 // ).toString();
 // const imgPath = path.join(process.cwd(), 'public', '90x50/pc_001jpg');
 if (import.meta.env.PROD) {
-  pdfjs.GlobalWorkerOptions.workerSrc = 'https://server-worker.vercel.app/public/pdf.min.mjs';
+  pdfjs.GlobalWorkerOptions.workerSrc = 'https://react-flipbook-app.vercel.app/assets/pdf.worker.min-GB3t0DcA.mjs';
 } else {
   pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     "pdfjs-dist/build/pdf.worker.min.mjs",
