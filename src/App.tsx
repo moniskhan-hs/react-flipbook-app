@@ -14,8 +14,9 @@ import Loader from "./Shared/Loader";
 //   import.meta.url
 // ).toString();
 // const imgPath = path.join(process.cwd(), 'public', '90x50/pc_001jpg');
+console.log('pdf version',pdfjs.version)
 if (import.meta.env.PROD) {
-  pdfjs.GlobalWorkerOptions.workerSrc = 'https://react-flipbook-app.vercel.app/pdf.min.mjs';
+  pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.worker.min.mjs';
 } else {
   pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     "pdfjs-dist/build/pdf.worker.min.mjs",
