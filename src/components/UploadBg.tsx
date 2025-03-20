@@ -10,7 +10,7 @@ type Props = {
 
 const UploadBg = ({ onBackgroundChange }: Props) => {
   const [file, setFile] = useState<File | null>(null); // Type `File` for file objects
-  console.log("file:", file);
+  console.log('file:', file)
   const dispatch = useDispatch();
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +65,7 @@ const UploadBg = ({ onBackgroundChange }: Props) => {
             hidden
           />
         </Button>
-        <span>No image chosen</span>
+        <span>{file?file.name:"No image chosen"}</span>
       </Box>
     </Stack>
   );

@@ -27,6 +27,7 @@ const PdfToImages = () => {
     { dataUrl: string; width: number; height: number }[]
   >([]);
   const [file, setFile] = useState<File | null>(null);
+  console.log('file:', file)
   const [coverColor, setCoverColor] = useState("#aabbcc");
   const dispatch = useDispatch();
   const processedPages = useRef<Set<number>>(new Set());

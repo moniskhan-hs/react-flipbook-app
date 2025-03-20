@@ -34,19 +34,28 @@ const App = () => {
   const [isLoggedUser, setIsLoggedUser] = useState<boolean>();
 
   useEffect(() => {
-    // user= firebase retured user
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        console.log("user:", user);
-        // not able to navigate from here
-        // setIsLoggedUser(true)
-        //  <Navigate to={'/table'} />
-        // window.location.href('/table')
-        // window.open('http://localhost:5173/table')
-      } else {
-        setIsLoggedUser(false);
-      }
-    });
+    // // user= firebase retured user
+    // onAuthStateChanged(auth, async (user) => {
+    //   if (user) {
+    //     console.log("user:", user);
+    //     // not able to navigate from here
+    //     // setIsLoggedUser(true)
+    //     //  <Navigate to={'/table'} />
+    //     // window.location.href('/table')
+    //     // window.open('http://localhost:5173/table')
+    //   } else {
+    //     setIsLoggedUser(false);
+    //   }
+    // });
+    if (import.meta.env.PROD) {
+      pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.8.69/build/pdf.worker.min.mjs';
+    } else {
+      pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+        "pdfjs-dist/build/pdf.worker.min.mjs",
+        import.meta.url
+      ).toString();
+    }
+    
   }, []);
 
   console.log("isLoggedUser:", isLoggedUser);
