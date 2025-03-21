@@ -1,5 +1,5 @@
 import { Launch } from "@mui/icons-material";
-import { IconButton } from "@mui/material";
+import { IconButton, Stack } from "@mui/material";
 import Box from "@mui/material/Box";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { collection, getDocs } from "firebase/firestore";
@@ -23,8 +23,10 @@ export default function GridTable() {
         ...doc.data(), // Document data);
       }));
       console.log("allData:", allData);
-          {/* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */}
-          setBooksData(allData);
+      {
+        /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
+      }
+      setBooksData(allData);
     };
 
     fetchData();
@@ -47,7 +49,10 @@ export default function GridTable() {
           <IconButton
             onClick={(e) => {
               e.stopPropagation(); // Prevent row selection when clicking the icon
-              window.open( `${import.meta.env.VITE_DEV_URL}/${params.row.link}`, "_blank");
+              window.open(
+                `${import.meta.env.VITE_DEV_URL}/${params.row.link}`,
+                "_blank"
+              );
             }}
           >
             <Launch />
@@ -57,8 +62,8 @@ export default function GridTable() {
     },
   ];
 
-  const rows = booksData.map((ele,index) => ({
-    id: index+1,
+  const rows = booksData.map((ele, index) => ({
+    id: index + 1,
     name: ele.name,
     link: `book/bookId/${ele.id}`,
   }));
@@ -68,14 +73,27 @@ export default function GridTable() {
       sx={{
         width: "100%",
         height: "100%",
-        px:'5rem'
+        px: {md:"5rem",xs:'0rem'},
       }}
-      >
-        {/* -------------------------------- header----------------------------- */}
-  <Header isSuccess = {true} title="Create New Book"  url={'/upload'} isCopy = {false}/>
+    >
+      {/* -------------------------------- header----------------------------- */}
+      <Stack direction={'row'} sx={{
+        display:"flex",
+        justifyContent:"center",
+        alignItems:"center",
+        mt:4
+      }}>
+   <Header
+        isSuccess={true}
+        title="Create New Book"
+        url={"/upload"}
+        isCopy={false}
+      />
+      </Stack>
+   
 
-        {/* -------------------------------- Grid----------------------------- */}
-      <Box sx={{ height: 400, width: "80%", mx: "auto", my: 5 }}>
+      {/* -------------------------------- Grid----------------------------- */}
+      <Box sx={{ height: 400, width: "100%", mx: "auto", my: 3 ,px:3}}>
         <DataGrid
           rows={rows}
           columns={columns}
