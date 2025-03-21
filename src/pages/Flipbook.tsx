@@ -1,11 +1,5 @@
 import { VolumeOff, VolumeUp } from "@mui/icons-material";
-import {
-  Box,
-  IconButton,
-  Stack,
-  useMediaQuery,
-  useTheme
-} from "@mui/material";
+import { Box, IconButton, Stack, useMediaQuery, useTheme } from "@mui/material";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useRef, useState } from "react";
 import HTMLFlipBook from "react-pageflip";
@@ -604,10 +598,10 @@ const FlipbookView = ({
                   width: "10rem",
                   height: "4rem",
                   // border:'1px dotted',
-                  display:"flex",
-                  justifyContent:"center",
-                  alignItems:"center",
-                  bgcolor:"#f3f3f3"
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  bgcolor: "#f3f3f3",
                 }}
               >
                 Your Logo
@@ -637,36 +631,40 @@ const FlipbookView = ({
           ></audio>
 
           {/* Speaker icon to control mute/unmute */}
-          <IconButton
-            sx={{
-              borderRadius: "50%",
-              border: `1px solid ${
-                isFetchingData && bookid ? documentData?.coverColor : coverColor
-              }`,
-            }}
-            onClick={handleToggleMute}
-            aria-label={isMuted ? "Unmute Audio" : "Mute Audio"}
-          >
-            {isMuted ? (
-              <VolumeOff
-                sx={{
-                  color:
-                    isFetchingData && bookid
-                      ? documentData?.spineColor
-                      : spineColor,
-                }}
-              />
-            ) : (
-              <VolumeUp
-                sx={{
-                  color:
-                    isFetchingData && bookid
-                      ? documentData?.coverColor
-                      : coverColor,
-                }}
-              />
-            )}
-          </IconButton>
+          {!isMobileView && (
+            <IconButton
+              sx={{
+                borderRadius: "50%",
+                border: `1px solid ${
+                  isFetchingData && bookid
+                    ? documentData?.coverColor
+                    : coverColor
+                }`,
+              }}
+              onClick={handleToggleMute}
+              aria-label={isMuted ? "Unmute Audio" : "Mute Audio"}
+            >
+              {isMuted ? (
+                <VolumeOff
+                  sx={{
+                    color:
+                      isFetchingData && bookid
+                        ? documentData?.spineColor
+                        : spineColor,
+                  }}
+                />
+              ) : (
+                <VolumeUp
+                  sx={{
+                    color:
+                      isFetchingData && bookid
+                        ? documentData?.coverColor
+                        : coverColor,
+                  }}
+                />
+              )}
+            </IconButton>
+          )}
         </div>
       </Box>
 
@@ -681,13 +679,65 @@ const FlipbookView = ({
             bgcolor: "#fff", // Background color
             boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)", // Top shadow for emphasis
             p: 2, // Padding
+            mt:1,
             display: "flex", // Flexbox for layout
             justifyContent: "center", // Space between children
             alignItems: "center", // Vertically center content
             zIndex: 1000, // Ensure it appears above other content
           }}
         >
-          {
+          <Box
+            sx={{
+              // bgcolor: "red",
+              width:'10%'
+              
+            }}
+          >
+            <IconButton
+              sx={{
+                borderRadius: "50%",
+                border: `1px solid ${
+                  isFetchingData && bookid
+                    ? documentData?.coverColor
+                    : coverColor
+                }`,
+              }}
+              onClick={handleToggleMute}
+              aria-label={isMuted ? "Unmute Audio" : "Mute Audio"}
+            >
+              {isMuted ? (
+                <VolumeOff
+                   fontSize="small"
+                  sx={{
+                    color:
+                      isFetchingData && bookid
+                        ? documentData?.spineColor
+                        : spineColor,
+                  }}
+                />
+              ) : (
+                <VolumeUp
+                fontSize="small"
+                  sx={{
+                    color:
+                      isFetchingData && bookid
+                        ? documentData?.coverColor
+                        : coverColor,
+                  }}
+                />
+              )}
+            </IconButton>
+          </Box>
+          <Box
+            sx={{
+              flex: 1,
+              display:"flex",
+              // justifyContent:"center",
+              alignItems:"center",
+              paddingLeft:"10%"
+
+            }}
+          >
             <NavigationsButtons
               currentPage={currentPage}
               flipBookRef={flipBookRef}
@@ -703,7 +753,7 @@ const FlipbookView = ({
                   : images?.length
               }
             />
-          }
+          </Box>
         </Box>
       )}
       {!isMobileView && (
