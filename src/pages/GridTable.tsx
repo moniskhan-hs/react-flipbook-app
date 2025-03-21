@@ -23,9 +23,7 @@ export default function GridTable() {
         ...doc.data(), // Document data);
       }));
       console.log("allData:", allData);
-      {
-        /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
-      }
+      {/* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */ }
       setBooksData(allData);
     };
 
