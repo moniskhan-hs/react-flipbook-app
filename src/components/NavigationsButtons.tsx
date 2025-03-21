@@ -7,6 +7,7 @@ type Props = {
   coverColor: string | undefined;
   spineColor: string | undefined;
   totalPage: number | undefined;
+  isMobileView?:boolean
 };
 
 const NavigationsButtons = ({
@@ -15,6 +16,7 @@ const NavigationsButtons = ({
   coverColor,
   spineColor,
   totalPage,
+  isMobileView=false
 }: Props) => {
   return (
     <Stack
@@ -53,12 +55,12 @@ const NavigationsButtons = ({
           fontSize: "1.3rem",
         }}
       >
-        {  currentPage + 2 <=totalPage! ?currentPage + 2:currentPage+1} / {totalPage}
+        { isMobileView ?  (currentPage + 1 <=totalPage! ? currentPage + 1: currentPage+1)  :(currentPage + 2 <=totalPage! ? currentPage + 2: currentPage+1) } / {totalPage }
       </Box>
       {/* -------------------------------- next button -------------------------*/}
       <Button
         variant="contained"
-        disabled={currentPage + 2 >= totalPage!}
+        disabled={isMobileView?currentPage + 1 >= totalPage! : currentPage + 2 >= totalPage!}
         /* @ts-expect-error: This error is intentional because the type mismatch is handled elsewhere */
         onClick={() => flipBookRef.current.pageFlip().flipNext()}
         sx={{

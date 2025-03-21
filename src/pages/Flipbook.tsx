@@ -752,6 +752,7 @@ const FlipbookView = ({
                   ? documentData?.images.length
                   : images?.length
               }
+              isMobileView={isMobileView}
             />
           </Box>
         </Box>
